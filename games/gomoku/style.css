@@ -1,0 +1,170 @@
+/* 棋盘容器 */
+.board-container {
+    touch-action: none;
+}
+
+/* 玩家卡片激活状态 */
+.player-card.active {
+    border-color: #d97706;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.player-card.active .font-bold:first-child {
+    color: #92400e;
+}
+
+/* 模式按钮 */
+.mode-btn {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+.mode-btn:hover {
+    background-color: #e5e7eb;
+}
+
+.mode-btn.active {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    color: white;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+}
+
+/* AI难度按钮 */
+.ai-level-btn {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+.ai-level-btn:hover {
+    background-color: #e5e7eb;
+}
+
+.ai-level-btn.active {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    color: white;
+}
+
+/* 弹窗 */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-content {
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+/* 胜利动画 */
+.win-animation {
+    animation: bounceIn 0.6s ease;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* 自定义滚动条 */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* 落子记录项 */
+.move-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.move-item:hover {
+    background-color: #f9fafb;
+}
+
+.move-item .move-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.move-item .move-dot.black {
+    background: #1f2937;
+    border: 1px solid #4b5563;
+}
+
+.move-item .move-dot.white {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+}
+
+/* 按钮禁用状态 */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 最后落子高亮 */
+.last-move-highlight {
+    animation: pulse-ring 1.5s ease infinite;
+}
+
+@keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(217, 119, 6, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+    .board-container {
+        order: -1;
+    }
+}
+
+/* 棋盘阴影 */
+#board-container {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.1);
+}

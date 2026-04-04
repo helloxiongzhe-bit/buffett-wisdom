@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head><script src="https://with.woa.com/d2c/assets/iframe.js?_t=1775325793856"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人物简介 — Buffett Wisdom</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <style id="critical-css">
+        html, body { background-color: #0a0a0f; }
+        html[data-theme="light"], html[data-theme="light"] body { background-color: #fafafa; }
+    </style>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('buffett-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+</head>
+<body class="grid-bg">
+    <div class="radial-glow"></div>
+    <div style="padding-top: 80px;" class="page-enter">
+        <section style="max-width: 1280px; margin: 0 auto; padding: 0 24px 80px;">
+            <div style="margin-bottom: 48px;">
+                <h1 style="font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; color: var(--text-primary); margin-bottom: 12px;">
+                    <i class="ri-user-star-line" style="color: var(--accent-blue);"></i> 人物简介
+                </h1>
+                <p style="color: var(--text-secondary); font-size: 15px; max-width: 600px;">
+                    了解沃伦·巴菲特和查理·芒格的传奇人生、投资哲学与经典语录。
+                </p>
+            </div>
+
+            <!-- 人物卡片 -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 24px; margin-bottom: 48px;" id="person-cards"></div>
+
+            <!-- 详情区域 -->
+            <div id="person-detail" style="display: none;"></div>
+        </section>
+    </div>
+
+    <script type="module">
+        import { createNav, createFooter, initRevealAnimations, getGlobalLang } from './components/nav.js';
+        import { people } from './data/people.js';
+
+        createNav('people');
+        createFooter();
+
+        const _globalLang = getGlobalLang();
+        const _isEn = _globalLang === 'en';
+
+        // 更新页面静态文本
+        if (_isEn) {
+            document.title = 'People — Buffett Wisdom';
+            const h1 = document.querySelector('h1');
+            if (h1) h1.innerHTML = '<i class="ri-user-star-line" style="color: var(--accent-blue);"></i> People';
+            const desc = h1 ? h1.parentElement.querySelector('p') : null;
+            if (desc) desc.textContent = "Learn about the legendary lives, investment philosophies, and classic quotes of Warren Buffett and Charlie Munger.";
+        }
+
+        const cardsContainer = document.getElementById('person-cards');
+        const detailContainer = document.getElementById('person-detail');
+
+        function renderCards() {
+            cardsContainer.innerHTML = Object.entries(people).map(([key, person]) => `
+                <div class="card glow-card person-card reveal" style="cursor: pointer;" data-person="${key}">
+                    <div class="avatar" style="background-image: url('${person.photo}'); background-size: cover; background-position: center;">${person.photo ? '' : person.emoji}</div>
+                    <h3 style="font-size: 22px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${_isEn ? person.nameEn : person.name}</h3>
+                    <p style="font-size: 14px; color: var(--accent-blue); font-family: var(--font-mono); margin-bottom: 8px;">${_isEn ? person.name : person.nameEn}</p>
+                    <p style="font-size: 13px; color: var(--text-tertiary); margin-bottom: 16px;">${person.title}</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                        <span style="font-size: 12px; padding: 4px 12px; background: var(--bg-tertiary); border-radius: 20px; color: var(--text-secondary);"><i class="ri-calendar-line"></i> ${person.born}</span>
+                        ${person.died ? `<span style="font-size: 12px; padding: 4px 12px; background: var(--bg-tertiary); border-radius: 20px; color: var(--text-secondary);"><i class="ri-heart-pulse-line"></i> ${person.died}</span>` : ''}
+                        <span style="font-size: 12px; padding: 4px 12px; background: var(--bg-tertiary); border-radius: 20px; color: var(--text-secondary);"><i class="ri-map-pin-line"></i> ${person.birthplace}</span>
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <span class="btn-primary" style="font-size: 13px; padding: 8px 20px;">${_isEn ? 'View Details →' : '查看详情 →'}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            cardsContainer.querySelectorAll('[data-person]').forEach(el => {
+                el.addEventListener('click', () => showDetail(el.dataset.person));
+            });
+
+            initRevealAnimations();
+        }
+
+        function showDetail(key) {
+            const person = people[key];
+            if (!person) return;
+
+            cardsContainer.style.display = 'none';
+            detailContainer.style.display = 'block';
+
+            detailContainer.innerHTML = `
+                <button id="back-btn" class="btn-ghost" style="margin-bottom: 24px; font-size: 13px; padding: 8px 16px;">
+                    <i class="ri-arrow-left-line"></i> ${_isEn ? 'Back' : '返回列表'}
+                </button>
+
+                <!-- 头部信息 -->
+                <div class="card" style="margin-bottom: 32px; padding: 32px;">
+                    <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; font-size: 40px; border: 2px solid var(--border-color); flex-shrink: 0; overflow: hidden;">${person.photo ? `<img src="${person.photo}" alt="${person.name}" style="width:100%;height:100%;object-fit:cover;">` : person.emoji}</div>
+                        <div>
+                            <h2 style="font-family: var(--font-serif); font-size: 2rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${_isEn ? person.nameEn : person.name}</h2>
+                            <p style="font-size: 15px; color: var(--accent-blue); font-family: var(--font-mono); margin-bottom: 4px;">${_isEn ? person.name : person.nameEn}</p>
+                            <p style="font-size: 14px; color: var(--text-tertiary);">${person.title}</p>
+                            ${person.nickname ? `<p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">${_isEn ? 'Also known as: ' : '别称：'}${person.nickname}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 简介 -->
+                <div class="card" style="margin-bottom: 32px;">
+                    <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;"><i class="ri-file-list-3-line" style="color: var(--accent-blue);"></i> ${_isEn ? 'Biography' : '生平简介'}</h3>
+                    <div class="content-area" style="white-space: pre-wrap; font-size: 14px; line-height: 1.9;">${person.bio}</div>
+                </div>
+
+                <!-- 人生时间线 -->
+                <div class="card" style="margin-bottom: 32px;">
+                    <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 24px;"><i class="ri-time-line" style="color: var(--accent-blue);"></i> ${_isEn ? 'Life Timeline' : '人生时间线'}</h3>
+                    <div class="timeline">
+                        ${person.timeline.map(item => `
+                            <div class="timeline-item" style="padding-bottom: 20px;">
+                                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                    <span class="year-badge" style="flex-shrink: 0;">${item.year}</span>
+                                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; padding-top: 2px;">${item.event}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- 投资哲学 -->
+                <div class="card" style="margin-bottom: 32px;">
+                    <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;"><i class="ri-lightbulb-flash-line" style="color: var(--accent-blue);"></i> ${_isEn ? 'Investment Philosophy' : '投资哲学'}</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        ${person.philosophy.map((p, i) => `
+                            <div style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: var(--bg-tertiary); border-radius: 10px;">
+                                <span style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent-glow); color: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0;">${i + 1}</span>
+                                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.7; padding-top: 3px;">${p}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- 经典语录 -->
+                <div class="card" style="margin-bottom: 32px;">
+                    <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;"><i class="ri-chat-quote-line" style="color: var(--accent-blue);"></i> ${_isEn ? 'Classic Quotes' : '经典语录'}</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px;">
+                        ${person.quotes.map(q => `
+                            <div class="quote-block">
+                                <p style="font-size: 15px; line-height: 1.8; margin-bottom: 8px; color: var(--text-primary); font-weight: 500;">${_isEn ? q.en : q.zh}</p>
+                                <p style="font-size: 13px; color: var(--text-tertiary); font-style: italic;">${_isEn ? q.zh : q.en}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('back-btn').addEventListener('click', () => {
+                detailContainer.style.display = 'none';
+                cardsContainer.style.display = 'grid';
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        renderCards();
+    </script>
+</body>
+</html>

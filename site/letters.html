@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head><script src="https://with.woa.com/d2c/assets/iframe.js?_t=1775325793504"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股东信 — Buffett Wisdom</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <!-- 关键内联CSS：在外部样式加载前立即设置背景色，消除白屏闪烁 -->
+    <style id="critical-css">
+        html, body { background-color: #0a0a0f; }
+        html[data-theme="light"], html[data-theme="light"] body { background-color: #fafafa; }
+    </style>
+    <script>
+        // 在DOM解析最早期就应用已保存的主题，避免闪烁
+        (function() {
+            var theme = localStorage.getItem('buffett-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+    <!-- PDF.js - 异步加载，不阻塞页面渲染 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/pdf.js/3.6.172/pdf.min.js" defer></script>
+    <style>
+        /* 主布局：左侧时间轴 + 右侧内容 */
+        .letters-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+            position: relative;
+        }
+
+        /* 左侧时间轴面板 */
+        .timeline-sidebar {
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+            padding-right: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+        .timeline-sidebar::-webkit-scrollbar { width: 4px; }
+        .timeline-sidebar::-webkit-scrollbar-track { background: transparent; }
+        .timeline-sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+        .timeline-sidebar::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+        /* 时间轴线 */
+        .tl-track {
+            position: relative;
+            padding-left: 24px;
+        }
+        .tl-track::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-blue), var(--border-color) 20%, var(--border-color) 80%, transparent);
+            border-radius: 1px;
+        }
+
+        /* 时间轴年份项 */
+        .tl-item {
+            position: relative;
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .tl-item::before {
+            content: '';
+            position: absolute;
+            left: -21px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            transition: all 0.25s ease;
+            z-index: 1;
+        }
+        .tl-item:hover {
+            background: var(--bg-card-hover);
+        }
+        .tl-item:hover::before {
+            border-color: var(--accent-blue);
+            background: var(--accent-glow);
+        }
+        .tl-item.active {
+            background: var(--accent-glow);
+        }
+        .tl-item.active::before {
+            border-color: var(--accent-blue);
+            background: var(--accent-blue);
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+        }
+        .tl-year {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 40px;
+            transition: color 0.25s ease;
+        }
+        .tl-item.active .tl-year,
+        .tl-item:hover .tl-year {
+            color: var(--text-primary);
+        }
+        .tl-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.25s ease;
+        }
+        .tl-item.active .tl-label {
+            color: var(--accent-blue);
+        }
+        .tl-highlight {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: color 0.25s ease;
+        }
+        .tl-item:hover .tl-highlight {
+            color: var(--text-secondary);
+        }
+        .tl-item.active .tl-highlight {
+            color: var(--accent-blue);
+            opacity: 0.85;
+        }
+        .tl-item .tl-badge {
+            margin-left: auto;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+        }
+        .tl-item.has-full .tl-badge {
+            background: var(--accent-glow);
+            color: var(--accent-blue);
+        }
+
+        /* 十年分组标题 */
+        .tl-decade {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 16px 12px 6px;
+            margin-left: 0;
+        }
+        .tl-decade:first-child {
+            padding-top: 4px;
+        }
+
+        /* 右侧内容区 */
+        .letters-content {
+            min-height: 60vh;
+        }
+
+        /* 内容卡片 */
+        .letter-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .letter-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+        .letter-card::after {
+            content: '\e110';
+            font-family: 'remixicon';
+            position: absolute;
+            top: 32px;
+            right: 32px;
+            font-size: 20px;
+            color: var(--text-tertiary);
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: all 0.3s ease;
+        }
+        .letter-card:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .letter-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .letter-card-year {
+            font-family: 'Cormorant Garamond', 'Playfair Display', var(--font-serif);
+            font-size: 2.2rem;
+            font-weight: 600;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        .letter-card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .letter-card-date {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+        .letter-card-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .letter-card-tags .tag {
+            font-size: 11px;
+            padding: 2px 8px;
+        }
+        .letter-card-summary {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+        .letter-card-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .letter-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            font-family: var(--font-sans);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+        .letter-action-btn:hover {
+            color: var(--text-primary);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.06);
+            transform: translateY(-1px);
+        }
+        .letter-action-btn.primary {
+            background: var(--accent-gradient);
+            color: #fff;
+            border: none;
+        }
+        .letter-action-btn.primary:hover {
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .back-to-top:hover {
+            color: var(--text-primary);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.1);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+            transform: translateY(-4px) scale(1.05);
+        }
+        .back-to-top:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        /* PDF查看器样式 - Canvas渲染 */
+        .pdf-viewer-container {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+        .pdf-canvas-wrapper {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+        .pdf-canvas-wrapper::-webkit-scrollbar { width: 6px; }
+        .pdf-canvas-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .pdf-canvas-wrapper::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        .pdf-canvas-wrapper canvas {
+            display: block;
+            max-width: 100%;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            border-radius: 4px;
+        }
+        .pdf-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        .pdf-toolbar .page-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+        }
+        .pdf-toolbar button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .pdf-toolbar button:hover {
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+        .pdf-toolbar button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pdf-viewer-container .pdf-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: var(--text-tertiary);
+            font-size: 14px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .pdf-viewer-container .pdf-loading .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toolbar-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: var(--font-sans);
+            text-decoration: none;
+        }
+        .toolbar-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+
+        /* 中英对译布局 */
+        .bilingual-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .bilingual-container .bilingual-pane { padding: 0; position: relative; }
+        .bilingual-container .bilingual-pane:first-child { border-right: 1px solid var(--border-color); }
+        .bilingual-pane-header {
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .bilingual-pane-body {
+            padding: 24px;
+            font-size: 14px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .bilingual-pane-body .pdf-canvas-wrapper {
+            padding: 8px;
+            max-height: 70vh;
+        }
+        .bilingual-pane-body .pdf-canvas-wrapper canvas {
+            max-width: 100%;
+        }
+
+        /* 视图模式Tab */
+        .view-mode-group {
+            display: flex;
+            gap: 4px;
+            padding: 3px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        .view-mode-btn {
+            padding: 6px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: var(--font-sans);
+            white-space: nowrap;
+        }
+        .view-mode-btn:hover { color: var(--text-primary); }
+        .view-mode-btn.active {
+            background: var(--accent-gradient);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 24px;
+            text-align: center;
+            color: var(--text-tertiary);
+        }
+        .empty-state i { font-size: 56px; margin-bottom: 16px; opacity: 0.5; }
+
+        /* 弹窗关闭按钮 */
+        #modal-close:hover {
+            color: var(--text-primary);
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.1);
+            transform: rotate(90deg);
+        }
+        /* 弹窗内回到顶部按钮 */
+        #modal-back-to-top:hover {
+            color: var(--text-primary);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.1);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+            transform: translateY(-4px) scale(1.05) !important;
+        }
+        /* 上一篇/下一篇导航按钮 */
+        .modal-nav-btn {
+            border-radius: 14px !important;
+            transition: all 0.3s ease !important;
+        }
+        .modal-nav-btn:hover {
+            border-color: rgba(99, 102, 241, 0.4) !important;
+            background: rgba(99, 102, 241, 0.08) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15) !important;
+        }
+
+        /* 弹窗加载动画 */
+        .modal-loading-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 24px;
+            gap: 24px;
+            animation: modalLoadFadeIn 0.3s ease;
+        }
+        @keyframes modalLoadFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-loading-spinner {
+            position: relative;
+            width: 56px;
+            height: 56px;
+        }
+        .modal-loading-spinner::before,
+        .modal-loading-spinner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+        }
+        .modal-loading-spinner::before {
+            border-top-color: var(--accent-blue);
+            border-right-color: var(--accent-purple, #8b5cf6);
+            animation: modalSpin 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        .modal-loading-spinner::after {
+            inset: 6px;
+            border-bottom-color: rgba(99, 102, 241, 0.3);
+            border-left-color: rgba(139, 92, 246, 0.3);
+            animation: modalSpin 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse;
+        }
+        @keyframes modalSpin {
+            to { transform: rotate(360deg); }
+        }
+        .modal-loading-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        .modal-loading-subtext {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin-top: -12px;
+        }
+        /* 骨架屏脉冲 */
+        .modal-skeleton {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 8px;
+        }
+        .modal-skeleton-line {
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--bg-tertiary) 25%, rgba(99,102,241,0.08) 50%, var(--bg-tertiary) 75%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.5s ease-in-out infinite;
+        }
+        .modal-skeleton-line:nth-child(1) { width: 45%; }
+        .modal-skeleton-line:nth-child(2) { width: 80%; }
+        .modal-skeleton-line:nth-child(3) { width: 65%; }
+        .modal-skeleton-line:nth-child(4) { width: 90%; }
+        .modal-skeleton-line:nth-child(5) { width: 50%; }
+        @keyframes skeletonShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        /* 弹窗内容淡入 */
+        .modal-content-fadein {
+            animation: modalContentFadeIn 0.4s ease both;
+        }
+        @keyframes modalContentFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .letters-layout {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .timeline-sidebar {
+                position: relative;
+                top: 0;
+                height: auto;
+                max-height: 240px;
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 16px;
+                background: var(--bg-card);
+            }
+            .tl-track { padding-left: 20px; }
+            .tl-track::before { left: 5px; }
+            .tl-item::before { left: -19px; width: 8px; height: 8px; }
+            .back-to-top { bottom: 20px; right: 20px; width: 44px; height: 44px; }
+        }
+        @media (max-width: 768px) {
+            .bilingual-container { grid-template-columns: 1fr; }
+            .bilingual-container .bilingual-pane:first-child { border-right: none; border-bottom: 1px solid var(--border-color); }
+            .bilingual-pane-body { max-height: 40vh; }
+            .bilingual-pane-body .pdf-canvas-wrapper { max-height: 40vh; }
+            .pdf-canvas-wrapper { max-height: 50vh; }
+        }
+    </style>
+</head>
+<body class="grid-bg">
+    <div class="radial-glow"></div>
+    <div style="padding-top: 80px;" class="page-enter">
+        <!-- 页面标题 -->
+        <section style="max-width: 1400px; margin: 0 auto; padding: 0 24px 32px;">
+            <div style="margin-bottom: 24px;">
+                <h1 id="page-title" style="font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; color: var(--text-primary); margin-bottom: 12px;">
+                    <i class="ri-scroll-unroll-line" style="color: var(--accent-blue);"></i> 股东信全文
+                </h1>
+                <p id="page-desc" style="color: var(--text-secondary); font-size: 15px; max-width: 600px;">
+                    覆盖1957年至今的全部历史股东信，提供中英双语版本切换和深度解读。
+                </p>
+            </div>
+            <!-- 语言切换 -->
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <div class="tab-group">
+                    <button class="tab-btn active" id="lang-zh" data-lang="zh">中文</button>
+                    <button class="tab-btn" id="lang-en" data-lang="en">English</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 主布局：左侧时间轴 + 右侧内容 -->
+        <div class="letters-layout">
+            <!-- 左侧时间轴 -->
+            <aside class="timeline-sidebar" id="timeline-sidebar">
+                <div class="tl-track" id="tl-track"></div>
+            </aside>
+
+            <!-- 右侧内容区 -->
+            <main class="letters-content" id="letters-content">
+                <div class="empty-state">
+                    <i class="ri-scroll-unroll-line"></i>
+                    <p id="empty-title" style="font-size: 16px; margin-bottom: 8px;">选择左侧年份查看股东信</p>
+                    <p id="empty-subtitle" style="font-size: 13px;">或向下滚动浏览全部内容</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button class="back-to-top" id="back-to-top" title="返回顶部">
+        <i class="ri-arrow-up-line"></i>
+    </button>
+
+    <!-- 详情弹窗 -->
+    <div id="letter-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:55; overflow-y:auto; padding-top:64px;">
+        <div style="max-width: 1100px; margin: 40px auto; padding: 24px;">
+            <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; padding: 40px; position: relative;">
+                <!-- 关闭按钮（弹窗内部右上角） -->
+                <button id="modal-close" style="position:absolute; top:16px; right:16px; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; font-size:20px; padding:0; width:40px; height:40px; border-radius:10px; transition: all 0.25s; z-index: 2; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                    <i class="ri-close-line"></i>
+                </button>
+                <div id="modal-content"></div>
+                <!-- 上一篇/下一篇导航 -->
+                <div id="modal-nav" style="display:none; margin-top:40px; padding-top:24px; border-top:1px solid var(--border-color);"></div>
+            </div>
+        </div>
+        <!-- 弹窗内回到顶部按钮 -->
+        <button id="modal-back-to-top" style="position:fixed; bottom:32px; right:32px; width:56px; height:56px; border-radius:16px; background:var(--glass-bg); backdrop-filter:blur(16px) saturate(180%); -webkit-backdrop-filter:blur(16px) saturate(180%); border:1px solid var(--glass-border); color:var(--text-secondary); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:24px; z-index:56; opacity:0; transform:translateY(20px) scale(0.8); pointer-events:none; transition:all 0.4s cubic-bezier(0.4,0,0.2,1); box-shadow:0 4px 24px rgba(0,0,0,0.15);">
+            <i class="ri-arrow-up-line"></i>
+        </button>
+    </div>
+
+    <script type="module">
+        import { createNav, createFooter, initRevealAnimations, getGlobalLang, setGlobalLang } from './components/nav.js';
+        import { getAllLetters, getLetterByYear } from './data/letters.js';
+
+        // 多语言文本映射
+        const i18n = {
+            zh: {
+                pageTitle: '股东信全文',
+                pageDesc: '覆盖1957年至今的全部历史股东信，提供中英双语版本切换和深度解读。',
+                emptyTitle: '选择左侧年份查看股东信',
+                emptySubtitle: '或向下滚动浏览全部内容',
+                backToTop: '返回顶部',
+                badgeFull: '全文',
+                badgeTranslation: '译文',
+                badgePdf: 'PDF',
+                keyPoints: '核心要点',
+                clickFull: '点击查看全文',
+                clickTranslation: '点击查看中文',
+                clickPdf: '点击查看 PDF 原文',
+                viewFull: '查看全文',
+                viewPdf: '查看PDF原文',
+                downloadPdf: '下载PDF',
+                pdfLoading: '正在加载 PDF 文档...',
+                pdfLoadingShort: '加载中...',
+                pdfFailed: 'PDF 文档加载失败，请选择以下方式查看：',
+                pdfOpenNew: '新窗口打开 PDF',
+                pdfDownload: '下载 PDF 原文',
+                pdfOpenNewShort: '新窗口打开',
+                pdfPages: (n) => `共 ${n} 页`,
+                pdfPage: (i, n) => `第 ${i} / ${n} 页`,
+                pdfNotLoaded: 'PDF.js 未加载',
+                letterTitle: (y) => `${y}年股东信`,
+                source: '来源：Berkshire Hathaway 官网',
+                chinese: '中文',
+                english: 'English',
+                englishPdf: 'English (PDF)',
+                bilingual: '中英对照',
+                chineseVersion: '中文版',
+                englishOriginalPdf: 'English Original (PDF)',
+                deepInterpretation: '深度解读',
+                prevLetter: '上一篇',
+                nextLetter: '下一篇',
+                letterSuffix: '年股东信',
+                annualReview: '年度回顾',
+                newWindowOpen: '新窗口打开PDF',
+            },
+            en: {
+                pageTitle: 'Shareholder Letters',
+                pageDesc: 'Complete collection of shareholder letters from 1957 to present, with bilingual versions and in-depth analysis.',
+                emptyTitle: 'Select a year from the timeline',
+                emptySubtitle: 'or scroll down to browse all letters',
+                backToTop: 'Back to top',
+                badgeFull: 'Full',
+                badgeTranslation: 'Trans',
+                badgePdf: 'PDF',
+                keyPoints: 'Key Points',
+                clickFull: 'Click to read full text',
+                clickTranslation: 'Click to view translation',
+                clickPdf: 'Click to view PDF original',
+                viewFull: 'Read Full Text',
+                viewPdf: 'View PDF Original',
+                downloadPdf: 'Download PDF',
+                pdfLoading: 'Loading PDF document...',
+                pdfLoadingShort: 'Loading...',
+                pdfFailed: 'Failed to load PDF. Please try the following options:',
+                pdfOpenNew: 'Open PDF in New Window',
+                pdfDownload: 'Download PDF',
+                pdfOpenNewShort: 'Open in New Window',
+                pdfPages: (n) => `${n} pages`,
+                pdfPage: (i, n) => `Page ${i} / ${n}`,
+                pdfNotLoaded: 'PDF.js not loaded',
+                letterTitle: (y) => `${y} Shareholder Letter`,
+                source: 'Source: Berkshire Hathaway Official Website',
+                chinese: '中文',
+                english: 'English',
+                englishPdf: 'English (PDF)',
+                bilingual: 'Bilingual',
+                chineseVersion: 'Chinese',
+                englishOriginalPdf: 'English Original (PDF)',
+                deepInterpretation: 'Deep Analysis',
+                prevLetter: 'Previous',
+                nextLetter: 'Next',
+                letterSuffix: ' Shareholder Letter',
+                annualReview: 'Annual Review',
+                newWindowOpen: 'Open PDF in New Window',
+            }
+        };
+
+        function t(key, ...args) {
+            const val = i18n[currentLang]?.[key] || i18n['zh'][key] || key;
+            return typeof val === 'function' ? val(...args) : val;
+        }
+
+        // 标签翻译映射
+        const tagTranslations = {
+            '继任': 'Succession', '税收': 'Taxes', '日本': 'Japan',
+            '查理·芒格': 'Charlie Munger', '保险': 'Insurance', '铁路': 'Railroad', '能源': 'Energy',
+            '资本配置': 'Capital Allocation', '回购': 'Buyback', '可口可乐': 'Coca-Cola', '美国运通': 'American Express',
+            '苹果': 'Apple', '基础设施': 'Infrastructure',
+            '疫情': 'Pandemic', '美国经济': 'US Economy',
+            '年度回顾': 'Annual Review',
+            '银行危机': 'Banking Crisis', '投资原则': 'Investment Principles',
+            '通胀': 'Inflation', '投机vs投资': 'Speculation vs Investing',
+        };
+        function translateTag(tag) {
+            if (currentLang === 'en' && tagTranslations[tag]) return tagTranslations[tag];
+            return tag;
+        }
+
+        // 获取 PDF.js 库（defer 加载，此时应已可用）
+        function getPdfjsLib() {
+            const lib = window['pdfjs-dist/build/pdf'] || window.pdfjsLib;
+            if (lib && !lib._workerConfigured) {
+                lib.GlobalWorkerOptions.workerSrc = 'https://cdn.bootcdn.net/ajax/libs/pdf.js/3.6.172/pdf.worker.min.js';
+                lib._workerConfigured = true;
+            }
+            return lib;
+        }
+        // 初始化 PDF.js（defer 脚本在 DOMContentLoaded 前执行完毕）
+        const pdfjsLib = getPdfjsLib();
+
+        /**
+         * 使用 Canvas 渲染 PDF 文档（替代 iframe + mozilla viewer 方案）
+         * @param {string} pdfUrl - PDF 文件 URL
+         * @param {HTMLElement} container - 放置 canvas 的容器元素
+         * @param {object} options - 可选配置 { scale, onProgress, onError }
+         */
+        async function renderPdfToCanvas(pdfUrl, container, options = {}) {
+            const { scale = 1.5, onProgress, onError } = options;
+            // 等待 PDF.js 加载完成（defer 脚本可能还在加载中）
+            let lib = getPdfjsLib();
+            if (!lib) {
+                // 等待最多 5 秒
+                for (let i = 0; i < 50; i++) {
+                    await new Promise(r => setTimeout(r, 100));
+                    lib = getPdfjsLib();
+                    if (lib) break;
+                }
+            }
+            if (!lib) {
+                if (onError) onError(new Error(t('pdfNotLoaded')));
+                return;
+            }
+            try {
+                const loadingTask = lib.getDocument({
+                    url: pdfUrl,
+                    cMapUrl: 'https://cdn.bootcdn.net/ajax/libs/pdf.js/3.6.172/cmaps/',
+                    cMapPacked: true,
+                });
+                const pdf = await loadingTask.promise;
+                const totalPages = pdf.numPages;
+                container.innerHTML = '';
+
+                // 创建工具栏
+                const toolbar = document.createElement('div');
+                toolbar.className = 'pdf-toolbar';
+                toolbar.innerHTML = `
+                    <button class="pdf-zoom-out" title="${currentLang === 'en' ? 'Zoom Out' : '缩小'}"><i class="ri-zoom-out-line"></i></button>
+                    <span class="page-info">${t('pdfPages', totalPages)}</span>
+                    <button class="pdf-zoom-in" title="${currentLang === 'en' ? 'Zoom In' : '放大'}"><i class="ri-zoom-in-line"></i></button>
+                `;
+                container.appendChild(toolbar);
+
+                // 创建滚动容器
+                const wrapper = document.createElement('div');
+                wrapper.className = 'pdf-canvas-wrapper';
+                container.appendChild(wrapper);
+
+                let currentScale = scale;
+                const canvases = [];
+
+                // 渲染所有页面
+                async function renderAllPages(renderScale) {
+                    wrapper.innerHTML = '';
+                    canvases.length = 0;
+                    for (let i = 1; i <= totalPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const viewport = page.getViewport({ scale: renderScale });
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        canvas.title = t('pdfPage', i, totalPages);
+                        wrapper.appendChild(canvas);
+                        canvases.push(canvas);
+                        await page.render({ canvasContext: ctx, viewport }).promise;
+                        if (onProgress) onProgress(i, totalPages);
+                    }
+                }
+
+                await renderAllPages(currentScale);
+
+                // 缩放按钮
+                toolbar.querySelector('.pdf-zoom-in').addEventListener('click', async () => {
+                    currentScale = Math.min(currentScale + 0.3, 4);
+                    await renderAllPages(currentScale);
+                });
+                toolbar.querySelector('.pdf-zoom-out').addEventListener('click', async () => {
+                    currentScale = Math.max(currentScale - 0.3, 0.5);
+                    await renderAllPages(currentScale);
+                });
+
+            } catch (err) {
+                console.error('PDF 渲染失败:', err);
+                container.innerHTML = `
+                    <div style="padding: 40px; text-align: center;">
+                        <i class="ri-file-pdf-2-line" style="font-size: 48px; color: var(--accent-blue); display: block; margin-bottom: 16px;"></i>
+                        <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.7; margin-bottom: 20px;">${t('pdfFailed')}</p>
+                        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                            <a href="${pdfUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; padding: 12px 28px; text-decoration: none;"><i class="ri-external-link-line"></i> ${t('pdfOpenNew')}</a>
+                            <a href="${pdfUrl}" download class="btn-ghost" style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; padding: 12px 28px; text-decoration: none;"><i class="ri-download-line"></i> ${t('pdfDownload')}</a>
+                        </div>
+                    </div>
+                `;
+                if (onError) onError(err);
+            }
+        }
+
+        createNav('letters');
+        createFooter();
+
+        // 将弹窗移出 page-wrapper（page-wrapper 的 will-change: transform 会破坏 fixed 定位）
+        const letterModalEl = document.getElementById('letter-modal');
+        if (letterModalEl && letterModalEl.parentElement && letterModalEl.parentElement.id === 'page-wrapper') {
+            document.body.appendChild(letterModalEl);
+        }
+
+        // 将返回顶部按钮也移出 page-wrapper（同理，will-change: transform 会破坏 fixed 定位）
+        const backToTopEl = document.getElementById('back-to-top');
+        if (backToTopEl && backToTopEl.parentElement && backToTopEl.parentElement.id === 'page-wrapper') {
+            document.body.appendChild(backToTopEl);
+        }
+
+        let currentLang = getGlobalLang();
+        const allLetters = getAllLetters();
+
+        // 初始化语言Tab按钮状态
+        if (currentLang === 'en') {
+            document.getElementById('lang-zh').classList.remove('active');
+            document.getElementById('lang-en').classList.add('active');
+        }
+
+        // 中文翻译摘要数据
+        const historicalTranslations = {
+            2019: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2019年的净值增长为814亿美元。推动这一增长的因素包括运营收益240亿美元以及已实现和未实现的资本利得。\n\n在过去的一年里，我们完成了对伯克希尔能源公司的全资收购，并继续增持了苹果公司的股票。我们的保险业务保持了强劲的承保纪律，浮存金继续增长。\n\nBNSF铁路在2019年运输了大量货物，为美国经济的运转做出了重要贡献。\n\n我要再次强调：永远不要做空美国。\n\n沃伦·E·巴菲特\n2020年2月22日`,
+            2018: `致伯克希尔·哈撒韦公司的股东们：\n\n2018年伯克希尔的净值增长为40亿美元。新的会计准则要求我们将未实现的投资收益计入净利润，这导致了报告数字的大幅波动。\n\n我想强调的是，关注运营收益比关注总收益更有意义。2018年我们的运营收益为248亿美元，较上年有显著增长。\n\n我们在2018年进行了大规模的股票回购，因为我们认为伯克希尔的股价低于其内在价值。\n\n沃伦·E·巴菲特\n2019年2月23日`,
+            2017: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔在2017年的净值增长为653亿美元，其中约360亿美元来自税改带来的一次性收益。\n\n2017年美国通过了《减税与就业法案》，将企业税率从35%降至21%。\n\n在运营方面，我们的保险业务经历了飓风等自然灾害的考验，但整体表现仍然令人满意。\n\n沃伦·E·巴菲特\n2018年2月24日`,
+            2016: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2016年的净值增长为275亿美元。每股账面价值增长了10.7%。\n\n在过去的52年里，每股账面价值从19美元增长到了172,108美元，年复合增长率为19%。\n\n2016年我们完成了对精密铸件公司的收购，这是伯克希尔历史上最大的一笔收购。\n\n沃伦·E·巴菲特\n2017年2月25日`,
+            2015: `致伯克希尔·哈撒韦公司的股东们：\n\n2015年伯克希尔的净值增长为154亿美元。今年是伯克希尔成立50周年。\n\n最重要的教训是：以合理的价格买入优秀的企业，远胜于以便宜的价格买入平庸的企业。\n\n沃伦·E·巴菲特\n2016年2月27日`,
+            2014: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2014年的净值增长为183亿美元。在过去50年里，每股账面价值从19美元增长到了146,186美元，年复合增长率为19.4%。\n\n沃伦·E·巴菲特\n2015年2月27日`,
+            2013: `致伯克希尔·哈撒韦公司的股东们：\n\n2013年伯克希尔的净值增长了342亿美元。我们的"五大巨头"合计贡献了超过100亿美元的税前利润。\n\n我们在2013年完成了对亨氏公司的收购。\n\n沃伦·E·巴菲特\n2014年2月28日`,
+            2012: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2012年的净值增长了241亿美元。2012年我们开始回购伯克希尔的股票。\n\n沃伦·E·巴菲特\n2013年3月1日`,
+            2011: `致伯克希尔·哈撒韦公司的股东们：\n\n2011年伯克希尔的净值增长了109亿美元。2011年的亮点是我们以约260亿美元收购了路博润公司。\n\n沃伦·E·巴菲特\n2012年2月25日`,
+            2010: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2010年的净值增长了130亿美元。2010年最重要的事件是我们完成了对BNSF铁路的全资收购。\n\n沃伦·E·巴菲特\n2011年2月26日`,
+            2009: `致伯克希尔·哈撒韦公司的股东们：\n\n2009年伯克希尔的净值增长了218亿美元，每股账面价值增长了19.8%。在过去45年里，每股账面价值从19美元增长到了84,487美元，年复合增长率为20.3%。\n\n2009年最重大的事件是我们以约265亿美元收购了伯灵顿北方圣太菲铁路公司（BNSF）。这是伯克希尔历史上最大的一笔收购，也是对美国经济未来的一次巨大赌注。铁路是美国经济的命脉，我相信美国最好的日子还在前面。\n\n我们在金融危机期间对高盛和通用电气的投资开始产生丰厚回报。这些投资是在"别人恐惧时贪婪"原则的指导下做出的。\n\n沃伦·E·巴菲特\n2010年2月27日`,
+            2008: `致伯克希尔·哈撒韦公司的股东们：\n\n2008年对伯克希尔来说是糟糕的一年。我们的净值下降了115亿美元，每股账面价值下降了9.6%。这是我执掌伯克希尔44年来表现最差的一年。\n\n然而，在金融海啸中，我们也看到了机会。我在《纽约时报》上发表了文章"买入美国，我正在买入"。我们向高盛投资了50亿美元，向通用电气投资了30亿美元。当别人恐惧时，正是我们贪婪的时候。\n\n衍生品继续是"金融大规模杀伤性武器"。这场危机证明了我多年来的警告是正确的。过度杠杆和复杂的金融工具几乎摧毁了整个金融体系。\n\n不过，我对美国的长期前景依然充满信心。美国的创新能力和企业家精神是无与伦比的。\n\n沃伦·E·巴菲特\n2009年2月27日`,
+            2007: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2007年的净值增长了123亿美元，每股账面价值增长了11%。在过去43年里，每股账面价值从19美元增长到了78,008美元，年复合增长率为21.1%。\n\n次贷危机已经开始显现。我要再次警告：衍生品是金融大规模杀伤性武器。那些复杂的金融产品——CDO、CDS等——正在制造系统性风险。\n\n在保险业务方面，我们的浮存金继续增长，承保纪律保持良好。我们的目标是在获得低成本浮存金的同时实现承保盈利。\n\n我们继续寻找"大象级"的收购目标。理想的收购对象应该具有持久的竞争优势、优秀的管理层和合理的价格。\n\n沃伦·E·巴菲特\n2008年2月29日`,
+            2006: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2006年的净值增长了169亿美元，每股账面价值增长了18.4%。\n\n我们的保险浮存金在2006年突破了500亿美元大关。更令人欣慰的是，这些浮存金的成本为负——也就是说，我们不仅免费使用了这些资金，保险业务本身还在赚钱。\n\n我正在积极寻找"大象级"的收购目标。伯克希尔拥有充裕的现金，随时准备出手。我们需要的是一家具有持久竞争优势的大型企业，由我们喜欢和信任的人管理，并且价格合理。\n\n沃伦·E·巴菲特\n2007年2月28日`,
+            2005: `致伯克希尔·哈撒韦公司的股东们：\n\n2005年伯克希尔的净值增长了56亿美元，每股账面价值增长了6.4%。\n\n2005年是保险业的灾难之年。卡特里娜飓风、丽塔飓风和威尔玛飓风给保险业造成了前所未有的损失。伯克希尔的保险业务也承受了约34亿美元的税前损失。但这正是我们存在的意义——当灾难来临时，我们有能力承担巨额理赔。\n\n尽管遭受了飓风损失，我们的承保纪律没有动摇。长期来看，保险业务仍然是伯克希尔最重要的利润来源之一。\n\n沃伦·E·巴菲特\n2006年2月28日`,
+            2004: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2004年的净值增长了83亿美元，每股账面价值增长了10.5%。\n\n我想讨论一下内在价值与账面价值的区别。账面价值是一个会计概念，而内在价值是企业在其剩余生命周期内能够产生的所有现金流的折现值。对于伯克希尔来说，内在价值远高于账面价值。\n\n在货币市场方面，我们从外汇投机中获得了教训。虽然我们在外汇交易中获利，但我认为这不是伯克希尔应该专注的领域。\n\n沃伦·E·巴菲特\n2005年3月1日`,
+            2003: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2003年的净值增长了136亿美元，每股账面价值增长了21%。\n\n尽管伊拉克战争给市场带来了不确定性，我们仍然坚持投资。恐惧是投资者的敌人，也是价值投资者的朋友。\n\n2003年我们完成了对Clayton Homes（移动房屋制造商）的收购。这家公司在行业低谷期展现了出色的管理能力。\n\n我要再次警告衍生品的风险。这些金融工具的复杂性使得风险几乎无法准确评估。\n\n沃伦·E·巴菲特\n2004年2月27日`,
+            2002: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2002年的净值增长了61亿美元，每股账面价值增长了10%。\n\n互联网泡沫的破裂给我们上了深刻的一课。那些没有盈利能力的公司，无论故事多么动听，最终都会回归现实。\n\n我在这封信中详细讨论了衍生品的危险。我将衍生品称为"金融大规模杀伤性武器"。这些工具的复杂性和相互关联性可能在某一天引发系统性危机。\n\n我们的保险业务继续表现出色，浮存金持续增长。\n\n沃伦·E·巴菲特\n2003年2月21日`,
+            2001: `致伯克希尔·哈撒韦公司的股东们：\n\n2001年伯克希尔的净值下降了37亿美元，每股账面价值下降了6.2%。\n\n9月11日的恐怖袭击改变了世界，也深刻影响了保险业。伯克希尔的保险业务承担了约22亿美元的9·11相关理赔。尽管损失巨大，但伯克希尔的财务实力使我们能够承受这样的冲击。\n\n这场灾难提醒我们，保险业务的核心是风险管理。我们必须始终为最坏的情况做好准备。\n\n沃伦·E·巴菲特\n2002年2月28日`,
+            2000: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔2000年的净值增长了39亿美元，每股账面价值增长了6.5%。\n\n科技泡沫终于破裂了。那些在1999年嘲笑我们"落伍"的人现在开始理解价值投资的意义。我们从未投资那些我们不理解的科技公司，这个决定被证明是正确的。\n\n投资的关键不是你知道多少，而是你对自己不知道什么有多清醒的认识。能力圈的边界比能力圈的大小更重要。\n\n沃伦·E·巴菲特\n2001年2月28日`,
+            1999: `致伯克希尔·哈撒韦公司的股东们：\n\n1999年伯克希尔的净值增长了3.58亿美元，每股账面价值仅增长了0.5%。这是我们表现最差的年份之一。\n\n在科技股狂热的1999年，我们选择了保持冷静。我们没有投资任何互联网公司，因为我们无法理解这些公司的商业模式，也无法预测它们的未来现金流。\n\n有人说我们"落伍"了，但我宁愿错过机会也不愿犯下无法挽回的错误。投资的第一条规则是永远不要亏钱，第二条规则是永远不要忘记第一条。\n\n沃伦·E·巴菲特\n2000年3月1日`,
+            1998: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1998年的净值增长了259亿美元，每股账面价值增长了48.3%。这是我们历史上表现最好的年份之一。\n\n1998年最重大的事件是我们以约220亿美元收购了通用再保险公司（General Re）。这笔收购大幅扩大了我们的保险业务版图和浮存金规模。\n\n通用再保险是全球最大的再保险公司之一，这笔收购使伯克希尔的保险帝国更加强大。\n\n沃伦·E·巴菲特\n1999年3月1日`,
+            1997: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1997年的净值增长了80亿美元，每股账面价值增长了34.1%。\n\n我想详细讨论一下我们的"超级巨灾"保险业务。这是一种为其他保险公司提供再保险的业务，专门承保地震、飓风等巨大自然灾害的风险。\n\n这项业务的特点是：大多数年份我们会收取保费而不需要理赔，但偶尔会面临巨额赔付。关键是定价必须合理，我们必须有足够的财务实力来承受最坏的情况。\n\n沃伦·E·巴菲特\n1998年2月27日`,
+            1996: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1996年的净值增长了62亿美元，每股账面价值增长了31.8%。\n\n在这封信中，我首次发布了"所有者手册"，阐述了伯克希尔的七大经营原则：\n\n1. 虽然我们的组织形式是公司，但我们的态度是合伙制的。\n2. 我们的大部分董事将自己的大部分净资产投入了伯克希尔。\n3. 我们的长期目标是使每股内在价值的年均增长率最大化。\n4. 我们偏好直接拥有产生现金的多元化企业。\n5. 我们几乎从不出售子公司。\n6. 我们对债务持谨慎态度。\n7. 管理层的薪酬与伯克希尔的业绩挂钩。\n\n沃伦·E·巴菲特\n1997年2月28日`,
+            1995: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1995年的净值增长了53亿美元，每股账面价值增长了43.1%。\n\n1995年最重要的事件是我们收购了GEICO保险公司的剩余股份，实现了全资控股。GEICO是一家了不起的公司，它的低成本直销模式是一条宽广的护城河。\n\n我与GEICO的渊源可以追溯到1951年，当时我还是本杰明·格雷厄姆的学生。我在一个周六拜访了GEICO的办公室，遇到了后来的CEO洛里默·戴维森，他花了四个小时向我解释保险业务。那次拜访改变了我的一生。\n\n沃伦·E·巴菲特\n1996年3月1日`,
+            1994: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1994年的净值增长了14亿美元，每股账面价值增长了13.9%。\n\n我们持有可口可乐的股票已经超过六年了。当初我们以约13亿美元买入，现在这笔投资的市值已经远超买入价。更重要的是，可口可乐每年支付给我们的股息在持续增长。\n\n这就是复利的魔力——时间是优秀企业的朋友，是平庸企业的敌人。\n\n沃伦·E·巴菲特\n1995年3月1日`,
+            1993: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1993年的净值增长了15亿美元，每股账面价值增长了14.3%。\n\n1993年我们收购了德克斯特鞋业公司。回顾这笔交易，我必须承认这是一个错误。我用伯克希尔的股票来支付收购价格，这使得错误的代价更加昂贵。\n\n这个教训让我更加坚定了一个信念：与其以便宜的价格买入平庸的企业（"烟蒂投资法"），不如以合理的价格买入优秀的企业。\n\n沃伦·E·巴菲特\n1994年3月1日`,
+            1992: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1992年的净值增长了15亿美元，每股账面价值增长了20.3%。\n\n在这封信中，我想详细讨论"护城河"的概念。一家真正优秀的企业必须拥有持久的竞争优势——也就是"护城河"。\n\n护城河可以来自多种来源：强大的品牌（如可口可乐）、网络效应、低成本优势、高转换成本或政府特许权。关键是这条护城河必须是持久的，能够抵御竞争对手的进攻。\n\n我们在投资时，首先寻找的就是护城河。没有护城河的企业，即使当前利润丰厚，也可能在未来被竞争侵蚀。\n\n沃伦·E·巴菲特\n1993年3月1日`,
+            1991: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1991年的净值增长了21亿美元，每股账面价值增长了39.6%。\n\n1991年最戏剧性的事件是所罗门兄弟公司的国债竞标丑闻。作为所罗门的大股东，我被迫临危受命担任临时董事长，处理这场危机。\n\n这段经历教会了我一个重要的教训：企业文化的重要性怎么强调都不为过。一个不良的企业文化可以在很短的时间内摧毁一家百年企业。\n\n沃伦·E·巴菲特\n1992年2月28日`,
+            1990: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1990年的净值增长了3.62亿美元，每股账面价值增长了7.3%。\n\n1990年美国经济陷入衰退，但衰退中往往蕴含着最好的投资机会。我们利用银行股的低迷，大量买入了富国银行的股票。\n\n富国银行是一家管理优秀的银行，拥有强大的零售银行业务和低成本的存款基础。在经济衰退中，优秀的银行会变得更强，因为弱小的竞争对手会被淘汰。\n\n沃伦·E·巴菲特\n1991年3月1日`,
+            1989: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1989年的净值增长了15亿美元，每股账面价值增长了44.4%。\n\n在这封信中，我想详细解释"所有者收益"的概念。所有者收益等于：净利润 + 折旧和摊销 - 维持性资本支出。\n\n这个指标比会计利润更能反映企业的真实盈利能力。许多企业的会计利润看起来很好，但如果需要大量的资本支出来维持运营，实际留给股东的现金就很少了。\n\n沃伦·E·巴菲特\n1990年3月2日`,
+            1988: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1988年的净值增长了5.69亿美元，每股账面价值增长了20.1%。\n\n1988年我们开始大量买入可口可乐的股票，最终投资约10.2亿美元。可口可乐拥有世界上最强大的品牌之一，其产品在全球200多个国家销售。\n\n我的投资原则是：如果你不愿意持有一只股票十年，那就不要持有它十分钟。可口可乐就是这样一家值得永远持有的企业。\n\n沃伦·E·巴菲特\n1989年2月28日`,
+            1987: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1987年的净值增长了4.64亿美元，每股账面价值增长了19.5%。\n\n1987年10月19日，"黑色星期一"，道琼斯指数单日暴跌22.6%。许多投资者恐慌抛售，但我们保持了冷静。\n\n市场的短期波动对长期投资者来说是无关紧要的。重要的是你持有的企业的内在价值是否在增长。如果你买入的是优秀的企业，市场的短期下跌反而是加仓的好机会。\n\n沃伦·E·巴菲特\n1988年2月29日`,
+            1986: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1986年的净值增长了4.93亿美元，每股账面价值增长了26.1%。\n\n1986年我们收购了斯科特费策尔公司（Scott Fetzer），这是一家多元化的制造企业。这笔收购体现了我们的投资理念：以合理的价格买入管理优秀的企业。\n\n沃伦·E·巴菲特\n1987年2月27日`,
+            1985: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1985年的净值增长了6.13亿美元，每股账面价值增长了48.2%。\n\n1985年我们做出了一个艰难但正确的决定：关闭伯克希尔的纺织业务。这项业务已经亏损多年，尽管我们的管理层非常努力，但行业的结构性问题使得盈利变得不可能。\n\n这个决定教会了我一个重要的教训：当你发现自己在一条漏水的船上时，换一条船比修补漏洞更有效。\n\n沃伦·E·巴菲特\n1986年3月4日`,
+            1984: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1984年的净值增长了1.48亿美元，每股账面价值增长了13.6%。\n\n1984年我们收购了内布拉斯加家具城（Nebraska Furniture Mart）。这家公司由罗斯·布鲁姆金（Rose Blumkin）——我们称她为"B夫人"——在1937年创立。她从俄罗斯移民到美国，以500美元起家，建立了全美最大的家具店。\n\nB夫人今年已经91岁了，但她仍然每天工作。她的经营哲学很简单：低价买入，低价卖出，诚实对待每一位顾客。\n\n沃伦·E·巴菲特\n1985年2月25日`,
+            1983: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1983年的净值增长了1.52亿美元，每股账面价值增长了32%。\n\n在这封信中，我想首次讨论"经济商誉"的概念。经济商誉与会计商誉是完全不同的东西。\n\n会计商誉是收购价格超过净资产的部分，它会随着时间摊销。但经济商誉——企业的超额盈利能力——不仅不会减少，反而可能随着时间增长。\n\n一家拥有强大品牌的企业，其经济商誉可能远远超过资产负债表上显示的数字。\n\n沃伦·E·巴菲特\n1984年3月14日`,
+            1982: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1982年的净值增长了2.08亿美元，每股账面价值增长了40%。\n\n我们的保险浮存金模式日趋成熟。保险业务为我们提供了大量低成本甚至零成本的资金，这些资金被用于投资，产生了显著的投资收益。\n\n这种"浮存金+投资"的商业模式是伯克希尔的核心竞争优势。\n\n沃伦·E·巴菲特\n1983年3月3日`,
+            1981: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1981年的运营收益为3970万美元。\n\n我想讨论一下通货膨胀对投资者的影响。通货膨胀就像一种隐性税收，它悄悄地侵蚀着投资者的实际购买力。\n\n即使你的投资名义上获得了正回报，如果回报率低于通胀率，你的实际财富其实在缩水。这就是为什么我们必须寻找那些能够在通胀环境中提高价格的企业。\n\n沃伦·E·巴菲特\n1982年2月26日`,
+            1980: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1980年的运营收益为4130万美元，每股账面价值增长了19.3%。\n\n1980年是保险业务和投资组合双丰收的一年。我们的保险浮存金继续增长，投资组合的表现也令人满意。\n\n我们继续坚持价值投资的原则：以合理的价格买入优秀的企业，然后长期持有。\n\n沃伦·E·巴菲特\n1981年2月27日`,
+            1979: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1979年的净值增长了1.02亿美元，每股账面价值增长了35.7%。\n\n在这封信中，我想详细解释保险浮存金的投资价值。浮存金是保险公司在收取保费后、支付理赔前持有的资金。\n\n如果我们能够以低于零的成本获得浮存金（即承保盈利），那么这些资金就相当于别人付钱让我们使用的免费资金。这是伯克希尔商业模式的核心。\n\n沃伦·E·巴菲特\n1980年3月3日`,
+            1978: `致伯克希尔·哈撒韦公司的股东们：\n\n伯克希尔1978年的每股账面价值增长了24%。\n\n1978年我们收购了多元零售公司的剩余股份，进一步扩大了我们的投资版图。\n\n我们的投资策略保持不变：寻找具有持久竞争优势的企业，以合理的价格买入，然后长期持有。\n\n沃伦·E·巴菲特\n1979年3月26日`,
+            1977: `致伯克希尔·哈撒韦公司的股东们：\n\n1977年伯克希尔的运营收益为2190万美元。\n\n这是我第一封正式的年度股东信。我希望通过这种方式与股东们坦诚沟通，分享我对企业经营和投资的思考。\n\n我们的纺织业务面临着激烈的竞争，但保险业务和投资组合的表现令人鼓舞。我相信，通过合理的资本配置，伯克希尔的未来将会更加光明。\n\n沃伦·E·巴菲特\n1978年3月14日`
+        };
+
+        // 按十年分组
+        function groupByDecade(letters) {
+            const groups = {};
+            letters.forEach(l => {
+                const decade = Math.floor(l.year / 10) * 10;
+                if (!groups[decade]) groups[decade] = [];
+                groups[decade].push(l);
+            });
+            return groups;
+        }
+
+        // 渲染左侧时间轴
+        function renderTimeline() {
+            const track = document.getElementById('tl-track');
+            const groups = groupByDecade(allLetters);
+            const decades = Object.keys(groups).sort((a, b) => b - a);
+            let html = '';
+
+            decades.forEach(decade => {
+                html += `<div class="tl-decade">${decade}s</div>`;
+                groups[decade].forEach(letter => {
+                    const hasFull = letter.contentZh || letter.contentEn;
+                    const hasTranslation = historicalTranslations[letter.year];
+                    const hasPdf = letter.pdfUrl;
+                    const badgeText = hasFull ? t('badgeFull') : (hasTranslation ? t('badgeTranslation') : (hasPdf ? t('badgePdf') : ''));
+                    const badgeClass = hasFull ? 'has-full' : (hasTranslation ? 'has-full' : '');
+                    const highlight = currentLang === 'en' ? (letter.highlightEn || letter.highlight || '') : (letter.highlight || '');
+                    html += `
+                        <div class="tl-item ${badgeClass}" data-year="${letter.year}">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <span class="tl-year">${letter.year}</span>
+                                ${badgeText ? `<span class="tl-badge">${badgeText}</span>` : ''}
+                            </div>
+                            ${highlight ? `<span class="tl-highlight">${highlight}</span>` : ''}
+                        </div>
+                    `;
+                });
+            });
+
+            track.innerHTML = html;
+
+            // 绑定点击事件 - 滚动到对应卡片
+            track.querySelectorAll('.tl-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const year = parseInt(item.dataset.year);
+                    // 高亮当前项
+                    track.querySelectorAll('.tl-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    handleTimelineClick(year);
+                });
+            });
+        }
+
+        // 选择年份，渲染右侧内容
+        function selectYear(year) {
+            const letter = getLetterByYear(year);
+            if (!letter) return;
+
+            const container = document.getElementById('letters-content');
+            const summary = currentLang === 'zh' ? letter.summary : (letter.summaryEn || letter.summary);
+            const hasFull = letter.contentZh || letter.contentEn;
+            const hasPdf = letter.pdfUrl;
+
+            let actionsHtml = '';
+            if (hasFull) {
+                actionsHtml += `<button class="letter-action-btn primary" data-action="full" data-year="${year}"><i class="ri-file-text-line"></i> ${t('viewFull')}</button>`;
+            }
+            if (hasPdf) {
+                actionsHtml += `<button class="letter-action-btn" data-action="pdf" data-year="${year}" data-pdf="${letter.pdfUrl}"><i class="ri-file-pdf-2-line"></i> ${t('viewPdf')}</button>`;
+                actionsHtml += `<a href="${letter.pdfUrl}" download class="letter-action-btn"><i class="ri-download-line"></i> ${t('downloadPdf')}</a>`;
+            }
+
+            container.innerHTML = `
+                <div class="letter-card reveal visible">
+                    <div class="letter-card-header">
+                        <span class="letter-card-year">${year}</span>
+                        <div class="letter-card-meta">
+                            <span class="letter-card-date"><i class="ri-calendar-line"></i> ${letter.date}</span>
+                            <div class="letter-card-tags">
+                                ${(letter.tags || []).map(tag => `<span class="tag">${translateTag(tag)}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    ${letter.keyPoints ? `
+                    <div style="background: var(--accent-glow); border: 1px solid rgba(99,102,241,0.15); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <h3 style="font-size: 14px; font-weight: 600; color: var(--accent-blue); margin-bottom: 12px;"><i class="ri-pushpin-line"></i> ${t('keyPoints')}</h3>
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            ${(currentLang === 'en' && letter.keyPointsEn ? letter.keyPointsEn : letter.keyPoints).map(p => `<li style="color: var(--text-secondary); font-size: 14px; line-height: 1.7; padding: 4px 0 4px 16px; position: relative;"><span style="position:absolute;left:0;color:var(--accent-blue);">•</span>${p}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+
+                    <div class="letter-card-summary">${summary}</div>
+                    <div class="letter-card-actions">${actionsHtml}</div>
+                </div>
+            `;
+
+            // 绑定操作按钮
+            container.querySelectorAll('[data-action="full"]').forEach(btn => {
+                btn.addEventListener('click', () => openLetterView(parseInt(btn.dataset.year)));
+            });
+            container.querySelectorAll('[data-action="pdf"]').forEach(btn => {
+                btn.addEventListener('click', () => openLetterView(parseInt(btn.dataset.year)));
+            });
+
+            // 滚动内容区到顶部
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 显示弹窗加载动画
+        function showModalLoading(year) {
+            const letter = getLetterByYear(year);
+            const modal = document.getElementById('letter-modal');
+            const content = document.getElementById('modal-content');
+            const navContainer = document.getElementById('modal-nav');
+            if (navContainer) navContainer.style.display = 'none';
+
+            const loadingText = currentLang === 'en' ? 'Loading letter...' : '正在加载股东信...';
+            const yearText = currentLang === 'en' ? `${year} Shareholder Letter` : `${year}年股东信`;
+
+            content.innerHTML = `
+                <div class="modal-loading-overlay">
+                    <div class="modal-loading-spinner"></div>
+                    <div class="modal-loading-text">${yearText}</div>
+                    <div class="modal-loading-subtext">${loadingText}</div>
+                    <div class="modal-skeleton">
+                        <div class="modal-skeleton-line"></div>
+                        <div class="modal-skeleton-line"></div>
+                        <div class="modal-skeleton-line"></div>
+                        <div class="modal-skeleton-line"></div>
+                        <div class="modal-skeleton-line"></div>
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+            modal.scrollTop = 0;
+            const topBar = document.getElementById('top-bar');
+            if (topBar) topBar.style.zIndex = '120';
+            const mainBackToTop = document.getElementById('back-to-top');
+            if (mainBackToTop) {
+                mainBackToTop.classList.remove('visible');
+                mainBackToTop.style.display = 'none';
+            }
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 打开某年份的信件详情（统一入口）
+        function openLetterView(year) {
+            const letter = getLetterByYear(year);
+            if (!letter) return;
+            const hasFull = letter.contentZh || letter.contentEn;
+            const hasTranslation = historicalTranslations[year];
+
+            // 先显示加载动画
+            showModalLoading(year);
+
+            // 延迟渲染实际内容，让加载动画先展示
+            setTimeout(() => {
+                if (hasFull) {
+                    showLetterDetail(year);
+                } else if (hasTranslation) {
+                    showLocalTranslation(year);
+                } else if (letter.pdfUrl) {
+                    showPdfModal(letter.pdfUrl, year);
+                }
+            }, 350);
+        }
+
+        // 显示本地中文译文（2020年前有翻译的信件）
+        function showLocalTranslation(year) {
+            const letter = getLetterByYear(year);
+            if (!letter) return;
+            const translation = historicalTranslations[year];
+            if (!translation) return;
+
+            const modal = document.getElementById('letter-modal');
+            const content = document.getElementById('modal-content');
+            const hasPdf = letter.pdfUrl;
+
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <span class="year-badge">${year}</span>
+                        <h2 style="font-family: var(--font-serif); font-size: 1.6rem; font-weight: 600; color: var(--text-primary);">${t('letterTitle', year)}</h2>
+                    </div>
+                    <p style="color: var(--text-tertiary); font-size: 13px;">${letter.date} · ${(currentLang === 'en' ? (letter.highlightEn || letter.highlight) : letter.highlight) || t('annualReview')}</p>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <div class="view-mode-group">
+                        <button class="view-mode-btn active" data-view="local-zh"><i class="ri-translate-2"></i> ${t('chinese')}</button>
+                        ${hasPdf ? `<button class="view-mode-btn" data-view="local-pdf"><i class="ri-file-pdf-2-line"></i> ${t('englishPdf')}</button>` : ''}
+                        ${hasPdf ? `<button class="view-mode-btn" data-view="local-bilingual"><i class="ri-layout-column-line"></i> ${t('bilingual')}</button>` : ''}
+                    </div>
+                    ${hasPdf ? `<a href="${letter.pdfUrl}" download class="toolbar-btn"><i class="ri-download-line"></i> ${t('downloadPdf')}</a>` : ''}
+                    ${hasPdf ? `<a href="${letter.pdfUrl}" target="_blank" rel="noopener noreferrer" class="toolbar-btn"><i class="ri-external-link-line"></i> ${t('newWindowOpen')}</a>` : ''}
+                </div>
+                <div id="view-local-zh">
+                    <div style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+                        <div class="bilingual-pane-header"><i class="ri-translate-2" style="color: var(--accent-blue);"></i> ${t('chinese')}</div>
+                        <div class="bilingual-pane-body" style="max-height: 70vh;">${translation}</div>
+                    </div>
+                </div>
+                ${hasPdf ? `
+                <div id="view-local-pdf" style="display: none;">
+                    <div class="pdf-viewer-container" id="local-pdf-container">
+                        <div class="pdf-loading"><div class="spinner"></div><span>${t('pdfLoading')}</span></div>
+                    </div>
+                </div>
+                <div id="view-local-bilingual" style="display: none;">
+                    <div class="bilingual-container">
+                        <div class="bilingual-pane">
+                            <div class="bilingual-pane-header"><i class="ri-global-line"></i> ${t('englishOriginalPdf')}</div>
+                            <div class="bilingual-pane-body" style="padding: 0;"><div class="pdf-viewer-container" id="local-bilingual-pdf-container"><div class="pdf-loading"><div class="spinner"></div><span>${t('pdfLoadingShort')}</span></div></div></div>
+                        </div>
+                        <div class="bilingual-pane">
+                            <div class="bilingual-pane-header"><i class="ri-translate-2"></i> ${t('chinese')}</div>
+                            <div class="bilingual-pane-body">${translation}</div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+
+            onModalOpen(year);
+
+            // 视图切换
+            let localPdfRendered = false;
+            let localBilingualPdfRendered = false;
+            content.querySelectorAll('.view-mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    content.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const view = btn.dataset.view;
+                    ['local-zh', 'local-pdf', 'local-bilingual'].forEach(v => {
+                        const el = content.querySelector('#view-' + v);
+                        if (el) el.style.display = v === view ? 'block' : 'none';
+                    });
+                    // 延迟渲染 PDF（仅在首次切换到 PDF 视图时渲染）
+                    if (view === 'local-pdf' && !localPdfRendered && hasPdf) {
+                        localPdfRendered = true;
+                        const pdfContainer = content.querySelector('#local-pdf-container');
+                        if (pdfContainer) renderPdfToCanvas(letter.pdfUrl, pdfContainer);
+                    }
+                    if (view === 'local-bilingual' && !localBilingualPdfRendered && hasPdf) {
+                        localBilingualPdfRendered = true;
+                        const biPdfContainer = content.querySelector('#local-bilingual-pdf-container');
+                        if (biPdfContainer) renderPdfToCanvas(letter.pdfUrl, biPdfContainer, { scale: 1.0 });
+                    }
+                });
+            });
+        }
+
+        // 渲染全部内容列表（默认视图）
+        function renderAllLetters() {
+            const container = document.getElementById('letters-content');
+            let html = '';
+
+            allLetters.forEach(letter => {
+                const summary = currentLang === 'zh' ? letter.summary : (letter.summaryEn || letter.summary);
+                const hasFull = letter.contentZh || letter.contentEn;
+                const hasTranslation = historicalTranslations[letter.year];
+                const hasPdf = letter.pdfUrl;
+
+                // 底部提示文字：告诉用户点击后会看到什么
+                let hintText = '';
+                let hintIcon = '';
+                if (hasFull) {
+                    hintText = t('clickFull');
+                    hintIcon = 'ri-file-text-line';
+                } else if (hasTranslation) {
+                    hintText = t('clickTranslation');
+                    hintIcon = 'ri-translate-2';
+                } else if (hasPdf) {
+                    hintText = t('clickPdf');
+                    hintIcon = 'ri-file-pdf-2-line';
+                }
+
+                html += `
+                    <div class="letter-card reveal" id="letter-${letter.year}" data-year="${letter.year}">
+                        <div class="letter-card-header">
+                            <span class="letter-card-year">${letter.year}</span>
+                            <div class="letter-card-meta">
+                                <span class="letter-card-date"><i class="ri-calendar-line"></i> ${letter.date}</span>
+                                <div class="letter-card-tags">
+                                    ${(letter.tags || []).map(tag => `<span class="tag">${translateTag(tag)}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        ${letter.keyPoints ? `
+                        <div style="background: var(--accent-glow); border: 1px solid rgba(99,102,241,0.15); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                            <h3 style="font-size: 13px; font-weight: 600; color: var(--accent-blue); margin-bottom: 8px;"><i class="ri-pushpin-line"></i> ${t('keyPoints')}</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                ${(currentLang === 'en' && letter.keyPointsEn ? letter.keyPointsEn : letter.keyPoints).slice(0, 3).map(p => `<li style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; padding: 2px 0 2px 14px; position: relative;"><span style="position:absolute;left:0;color:var(--accent-blue);">•</span>${p}</li>`).join('')}
+                            </ul>
+                        </div>
+                        ` : ''}
+                        <div class="letter-card-summary">${summary}</div>
+                        ${hintText ? `
+                        <div style="display: flex; align-items: center; gap: 6px; color: var(--accent-blue); font-size: 13px; font-weight: 500; margin-top: 4px; opacity: 0.7; transition: opacity 0.25s;">
+                            <i class="${hintIcon}"></i> ${hintText} <i class="ri-arrow-right-s-line"></i>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // 绑定卡片整体点击事件
+            container.querySelectorAll('.letter-card[data-year]').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // 如果点击的是链接或按钮，不触发卡片点击
+                    if (e.target.closest('a') || e.target.closest('button')) return;
+                    const year = parseInt(card.dataset.year);
+                    openLetterView(year);
+                });
+            });
+
+            initRevealAnimations();
+
+            // 重新绑定 IntersectionObserver 以跟踪滚动位置
+            rebindScrollObserver();
+        }
+
+        // 滚动时自动高亮时间轴对应年份
+        let scrollObserver = null;
+        function rebindScrollObserver() {
+            if (scrollObserver) scrollObserver.disconnect();
+            const timelineSidebar = document.getElementById('timeline-sidebar');
+            scrollObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const year = entry.target.id.replace('letter-', '');
+                        const tlItem = document.querySelector(`.tl-item[data-year="${year}"]`);
+                        if (tlItem) {
+                            document.querySelectorAll('.tl-item').forEach(i => i.classList.remove('active'));
+                            tlItem.classList.add('active');
+                            if (timelineSidebar) {
+                                const sidebarRect = timelineSidebar.getBoundingClientRect();
+                                const itemRect = tlItem.getBoundingClientRect();
+                                const itemTop = itemRect.top - sidebarRect.top + timelineSidebar.scrollTop;
+                                const targetScroll = itemTop - sidebarRect.height / 2 + itemRect.height / 2;
+                                timelineSidebar.scrollTo({ top: targetScroll, behavior: 'smooth' });
+                            }
+                        }
+                    }
+                });
+            }, { threshold: 0.3, rootMargin: '-20% 0px -60% 0px' });
+
+            document.querySelectorAll('.letter-card[id]').forEach(card => {
+                scrollObserver.observe(card);
+            });
+        }
+
+        // 显示PDF弹窗
+        function showPdfModal(pdfUrl, year) {
+            const modal = document.getElementById('letter-modal');
+            const content = document.getElementById('modal-content');
+            const hasTranslation = historicalTranslations[year];
+
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <span class="year-badge">${year}</span>
+                        <h2 style="font-family: var(--font-serif); font-size: 1.6rem; font-weight: 600; color: var(--text-primary);">${t('letterTitle', year)}</h2>
+                    </div>
+                    <p style="color: var(--text-tertiary); font-size: 13px;">${t('source')}</p>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <div class="view-mode-group">
+                        <button class="view-mode-btn active" data-view="pdf"><i class="ri-file-pdf-2-line"></i> ${t('english')}</button>
+                        ${hasTranslation ? `
+                        <button class="view-mode-btn" data-view="zh"><i class="ri-translate-2"></i> ${t('chinese')}</button>
+                        <button class="view-mode-btn" data-view="bilingual"><i class="ri-layout-column-line"></i> ${t('bilingual')}</button>
+                        ` : ''}
+                    </div>
+                    <a href="${pdfUrl}" download class="toolbar-btn"><i class="ri-download-line"></i> ${t('downloadPdf')}</a>
+                    <a href="${pdfUrl}" target="_blank" rel="noopener noreferrer" class="toolbar-btn"><i class="ri-external-link-line"></i> ${t('pdfOpenNewShort')}</a>
+                </div>
+                <div id="view-pdf" class="pdf-viewer-container" style="min-height: 200px;">
+                    <div class="pdf-loading" id="pdf-loading-indicator"><div class="spinner"></div><span>${t('pdfLoading')}</span></div>
+                </div>
+                ${hasTranslation ? `
+                <div id="view-zh" style="display: none;">
+                    <div style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+                        <div class="bilingual-pane-header"><i class="ri-translate-2" style="color: var(--accent-blue);"></i> ${t('chinese')}</div>
+                        <div class="bilingual-pane-body">${historicalTranslations[year]}</div>
+                    </div>
+                </div>
+                <div id="view-bilingual" style="display: none;">
+                    <div class="bilingual-container">
+                        <div class="bilingual-pane">
+                            <div class="bilingual-pane-header"><i class="ri-global-line"></i> ${t('englishOriginalPdf')}</div>
+                            <div class="bilingual-pane-body" style="padding: 0;"><div class="pdf-viewer-container" id="bilingual-pdf-container"><div class="pdf-loading"><div class="spinner"></div><span>${t('pdfLoadingShort')}</span></div></div></div>
+                        </div>
+                        <div class="bilingual-pane">
+                            <div class="bilingual-pane-header"><i class="ri-translate-2"></i> ${t('chinese')}</div>
+                            <div class="bilingual-pane-body">${historicalTranslations[year]}</div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+
+            onModalOpen(parseInt(year));
+
+            // 立即渲染主 PDF 视图（Canvas 方式）
+            const mainPdfContainer = content.querySelector('#view-pdf');
+            if (mainPdfContainer) {
+                renderPdfToCanvas(pdfUrl, mainPdfContainer);
+            }
+
+            // 视图切换
+            let bilingualPdfRendered = false;
+            content.querySelectorAll('.view-mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    content.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const view = btn.dataset.view;
+                    ['pdf', 'zh', 'bilingual'].forEach(v => {
+                        const el = content.querySelector('#view-' + v);
+                        if (el) el.style.display = v === view ? 'block' : 'none';
+                    });
+                    // 延迟渲染双语 PDF
+                    if (view === 'bilingual' && !bilingualPdfRendered) {
+                        bilingualPdfRendered = true;
+                        const biPdfContainer = content.querySelector('#bilingual-pdf-container');
+                        if (biPdfContainer) renderPdfToCanvas(pdfUrl, biPdfContainer, { scale: 1.0 });
+                    }
+                });
+            });
+        }
+
+        // 显示全文详情
+        function showLetterDetail(year) {
+            const letter = getLetterByYear(year);
+            if (!letter || (!letter.contentZh && !letter.contentEn)) return;
+
+            const modal = document.getElementById('letter-modal');
+            const content = document.getElementById('modal-content');
+            const hasBothLangs = letter.contentZh && letter.contentEn;
+            const interpretation = letter.interpretation || '';
+
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <span class="year-badge">${year}</span>
+                        <h2 style="font-family: var(--font-serif); font-size: 1.6rem; font-weight: 600; color: var(--text-primary);">${t('letterTitle', year)}</h2>
+                    </div>
+                    <p style="color: var(--text-tertiary); font-size: 13px;">${letter.date}</p>
+                </div>
+                ${letter.keyPoints ? `
+                <div style="background: var(--accent-glow); border: 1px solid rgba(99,102,241,0.15); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                    <h3 style="font-size: 14px; font-weight: 600; color: var(--accent-blue); margin-bottom: 12px;"><i class="ri-pushpin-line"></i> ${t('keyPoints')}</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        ${(currentLang === 'en' && letter.keyPointsEn ? letter.keyPointsEn : letter.keyPoints).map(p => `<li style="color: var(--text-secondary); font-size: 14px; line-height: 1.7; padding: 4px 0 4px 16px; position: relative;"><span style="position:absolute;left:0;color:var(--accent-blue);">•</span>${p}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div class="view-mode-group">
+                        <button class="view-mode-btn ${currentLang === 'zh' ? 'active' : ''}" data-view="zh-text"><i class="ri-translate-2"></i> ${t('chinese')}</button>
+                        <button class="view-mode-btn ${currentLang === 'en' ? 'active' : ''}" data-view="en-text"><i class="ri-global-line"></i> ${t('english')}</button>
+                        ${hasBothLangs ? `<button class="view-mode-btn" data-view="bilingual-text"><i class="ri-layout-column-line"></i> ${t('bilingual')}</button>` : ''}
+                        ${interpretation ? `<button class="view-mode-btn" data-view="interpret"><i class="ri-lightbulb-line"></i> ${t('deepInterpretation')}</button>` : ''}
+                    </div>
+                </div>
+                <div id="view-zh-text" class="content-area" style="${currentLang === 'en' ? 'display:none;' : ''} white-space: pre-wrap; font-size: 15px; line-height: 1.9;">${letter.contentZh || letter.contentEn}</div>
+                <div id="view-en-text" class="content-area" style="${currentLang === 'en' ? '' : 'display:none;'} white-space: pre-wrap; font-size: 15px; line-height: 1.9;">${letter.contentEn || letter.contentZh}</div>
+                ${hasBothLangs ? `
+                <div id="view-bilingual-text" style="display: none;">
+                    <div class="bilingual-container">
+                        <div class="bilingual-pane"><div class="bilingual-pane-header"><i class="ri-translate-2"></i> ${t('chineseVersion')}</div><div class="bilingual-pane-body">${letter.contentZh}</div></div>
+                        <div class="bilingual-pane"><div class="bilingual-pane-header"><i class="ri-global-line"></i> ${t('english')}</div><div class="bilingual-pane-body">${letter.contentEn}</div></div>
+                    </div>
+                </div>
+                ` : ''}
+                ${interpretation ? `<div id="view-interpret" class="content-area" style="display:none; font-size: 15px; line-height: 1.9;">${renderMarkdown(interpretation)}</div>` : ''}
+            `;
+
+            onModalOpen(year);
+
+            content.querySelectorAll('.view-mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    content.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const view = btn.dataset.view;
+                    ['zh-text', 'en-text', 'bilingual-text', 'interpret'].forEach(v => {
+                        const el = content.querySelector('#view-' + v);
+                        if (el) el.style.display = v === view ? 'block' : 'none';
+                    });
+                });
+            });
+        }
+
+        function renderMarkdown(text) {
+            return text
+                .replace(/^### (.+)$/gm, '<h3 style="font-size:1.1rem;font-weight:600;color:var(--text-primary);margin:1.5rem 0 0.5rem;">$1</h3>')
+                .replace(/^## (.+)$/gm, '<h2 style="font-family:var(--font-serif);font-size:1.4rem;font-weight:600;color:var(--text-primary);margin:2rem 0 0.75rem;">$1</h2>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
+                .replace(/\n\n/g, '</p><p style="margin-bottom:1rem;">')
+                .replace(/^/, '<p style="margin-bottom:1rem;">')
+                .replace(/$/, '</p>');
+        }
+
+        // 获取上一篇和下一篇信件
+        function getAdjacentLetters(year) {
+            const idx = allLetters.findIndex(l => l.year === year);
+            const prev = idx < allLetters.length - 1 ? allLetters[idx + 1] : null; // 更早的年份
+            const next = idx > 0 ? allLetters[idx - 1] : null; // 更近的年份
+            return { prev, next };
+        }
+
+        // 渲染上一篇/下一篇导航
+        function renderModalNav(year) {
+            const navContainer = document.getElementById('modal-nav');
+            const { prev, next } = getAdjacentLetters(year);
+
+            if (!prev && !next) {
+                navContainer.style.display = 'none';
+                return;
+            }
+
+            navContainer.style.display = 'flex';
+            navContainer.style.justifyContent = 'space-between';
+            navContainer.style.alignItems = 'stretch';
+            navContainer.style.gap = '16px';
+            navContainer.style.flexWrap = 'wrap';
+
+            let html = '';
+
+            // 上一篇（更早的年份）
+            if (prev) {
+                html += `
+                    <button class="letter-action-btn modal-nav-btn" data-nav-year="${prev.year}" style="flex:1; min-width:200px; text-align:left; padding:16px 20px; display:flex; flex-direction:column; gap:6px;">
+                        <span style="font-size:12px; color:var(--text-tertiary); display:flex; align-items:center; gap:4px;"><i class="ri-arrow-left-s-line"></i> ${t('prevLetter')}</span>
+                        <span style="font-size:15px; font-weight:600; color:var(--text-primary);">${t('letterTitle', prev.year)}</span>
+                        ${(currentLang === 'en' ? (prev.highlightEn || prev.highlight) : prev.highlight) ? `<span style="font-size:12px; color:var(--text-secondary); line-height:1.5; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;">${currentLang === 'en' ? (prev.highlightEn || prev.highlight) : prev.highlight}</span>` : ''}
+                    </button>
+                `;
+            } else {
+                html += `<div style="flex:1; min-width:200px;"></div>`;
+            }
+
+            // 下一篇（更近的年份）
+            if (next) {
+                html += `
+                    <button class="letter-action-btn modal-nav-btn" data-nav-year="${next.year}" style="flex:1; min-width:200px; text-align:right; padding:16px 20px; display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+                        <span style="font-size:12px; color:var(--text-tertiary); display:flex; align-items:center; gap:4px;">${t('nextLetter')} <i class="ri-arrow-right-s-line"></i></span>
+                        <span style="font-size:15px; font-weight:600; color:var(--text-primary);">${t('letterTitle', next.year)}</span>
+                        ${(currentLang === 'en' ? (next.highlightEn || next.highlight) : next.highlight) ? `<span style="font-size:12px; color:var(--text-secondary); line-height:1.5; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;">${currentLang === 'en' ? (next.highlightEn || next.highlight) : next.highlight}</span>` : ''}
+                    </button>
+                `;
+            } else {
+                html += `<div style="flex:1; min-width:200px;"></div>`;
+            }
+
+            navContainer.innerHTML = html;
+
+            // 绑定导航点击事件
+            navContainer.querySelectorAll('.modal-nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const navYear = parseInt(btn.dataset.navYear);
+                    // 滚动弹窗到顶部
+                    letterModal.scrollTo({ top: 0, behavior: 'smooth' });
+                    setTimeout(() => openLetterView(navYear), 200);
+                });
+            });
+        }
+
+        // 弹窗打开后的通用处理
+        function onModalOpen(year) {
+            const modal = document.getElementById('letter-modal');
+            const content = document.getElementById('modal-content');
+            // 弹窗可能已经由 showModalLoading 打开，确保状态正确
+            modal.style.display = 'block';
+            modal.scrollTop = 0;
+            renderModalNav(year);
+            // top-bar 已经在 body 直接子节点下，只需提升 z-index 到弹窗之上
+            const topBar = document.getElementById('top-bar');
+            if (topBar) {
+                topBar.style.zIndex = '120';
+            }
+            // 隐藏主页面的返回顶部按钮，避免与弹窗内的按钮重叠
+            const mainBackToTop = document.getElementById('back-to-top');
+            if (mainBackToTop) {
+                mainBackToTop.classList.remove('visible');
+                mainBackToTop.style.display = 'none';
+            }
+            document.body.style.overflow = 'hidden';
+            // 给内容添加淡入动画
+            if (content) {
+                content.classList.add('modal-content-fadein');
+                content.addEventListener('animationend', () => {
+                    content.classList.remove('modal-content-fadein');
+                }, { once: true });
+            }
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            const modal = document.getElementById('letter-modal');
+            modal.style.display = 'none';
+            modal.scrollTop = 0;
+            document.getElementById('modal-back-to-top').style.opacity = '0';
+            document.getElementById('modal-back-to-top').style.transform = 'translateY(20px) scale(0.8)';
+            document.getElementById('modal-back-to-top').style.pointerEvents = 'none';
+            // 恢复顶部导航栏的 z-index
+            const topBar = document.getElementById('top-bar');
+            if (topBar) {
+                topBar.style.zIndex = '';
+            }
+            // 恢复主页面的返回顶部按钮
+            const mainBackToTop = document.getElementById('back-to-top');
+            if (mainBackToTop) {
+                mainBackToTop.style.display = '';
+                // 根据当前滚动位置决定是否显示
+                if (window.scrollY > window.innerHeight) {
+                    mainBackToTop.classList.add('visible');
+                }
+            }
+            document.body.style.overflow = '';
+        }
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('letter-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('letter-modal')) {
+                closeModal();
+            }
+        });
+
+        // 弹窗内回到顶部按钮
+        const modalBackToTop = document.getElementById('modal-back-to-top');
+        const letterModal = document.getElementById('letter-modal');
+        letterModal.addEventListener('scroll', () => {
+            if (letterModal.scrollTop > window.innerHeight * 0.8) {
+                modalBackToTop.style.opacity = '1';
+                modalBackToTop.style.transform = 'translateY(0) scale(1)';
+                modalBackToTop.style.pointerEvents = 'auto';
+            } else {
+                modalBackToTop.style.opacity = '0';
+                modalBackToTop.style.transform = 'translateY(20px) scale(0.8)';
+                modalBackToTop.style.pointerEvents = 'none';
+            }
+        }, { passive: true });
+        modalBackToTop.addEventListener('click', () => {
+            letterModal.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // 更新页面静态文本（语言切换时调用）
+        function updateStaticTexts() {
+            const pageTitle = document.getElementById('page-title');
+            const pageDesc = document.getElementById('page-desc');
+            const backToTopBtn = document.getElementById('back-to-top');
+            if (pageTitle) pageTitle.innerHTML = `<i class="ri-scroll-unroll-line" style="color: var(--accent-blue);"></i> ${t('pageTitle')}`;
+            if (pageDesc) pageDesc.textContent = t('pageDesc');
+            if (backToTopBtn) backToTopBtn.title = t('backToTop');
+            // 更新页面标题
+            document.title = currentLang === 'zh' ? '股东信 — Buffett Wisdom' : 'Shareholder Letters — Buffett Wisdom';
+        }
+
+        // 语言切换
+        document.querySelectorAll('.tab-btn[data-lang]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn[data-lang]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLang = btn.dataset.lang;
+                setGlobalLang(currentLang);
+                updateStaticTexts();
+                renderTimeline();
+                renderAllLetters();
+            });
+        });
+
+        // 返回顶部按钮逻辑
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > window.innerHeight) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        }, { passive: true });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // 时间轴点击滚动到对应卡片
+        function handleTimelineClick(year) {
+            const card = document.getElementById('letter-' + year);
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // 高亮闪烁效果
+                card.style.borderColor = 'rgba(99, 102, 241, 0.5)';
+                card.style.boxShadow = '0 0 24px rgba(99, 102, 241, 0.15)';
+                setTimeout(() => {
+                    card.style.borderColor = '';
+                    card.style.boxShadow = '';
+                }, 1500);
+            }
+        }
+
+        // 初始化
+        updateStaticTexts();
+        renderTimeline();
+        renderAllLetters();
+    </script>
+</body>
+</html>

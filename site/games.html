@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head><script src="https://with.woa.com/d2c/assets/iframe.js?_t=1775325793933"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>休闲游戏 — Buffett Wisdom</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <style id="critical-css">
+        html, body { background-color: #0a0a0f; }
+        html[data-theme="light"], html[data-theme="light"] body { background-color: #fafafa; }
+    </style>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('buffett-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+</head>
+<body class="grid-bg">
+    <div class="radial-glow"></div>
+    <div style="padding-top: 80px;" class="page-enter">
+        <section style="max-width: 1280px; margin: 0 auto; padding: 0 24px 80px;">
+            <div style="margin-bottom: 48px;">
+                <h1 style="font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; color: var(--text-primary); margin-bottom: 12px;">
+                    <i class="ri-gamepad-line" style="color: var(--accent-blue);"></i> 休闲游戏
+                </h1>
+                <p style="color: var(--text-secondary); font-size: 15px; max-width: 600px;">
+                    在学习投资知识之余放松身心，享受智力博弈的乐趣。
+                </p>
+            </div>
+
+            <!-- 游戏卡片 -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; margin-bottom: 48px;">
+                <div class="card glow-card" style="cursor: pointer;" id="gomoku-card">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(192,132,252,0.15)); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; color: #c084fc;"><i class="ri-goblet-line"></i></div>
+                        <div>
+                            <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">五子棋</h3>
+                            <span style="font-size: 13px; color: var(--text-tertiary);">经典对弈 · 智慧博弈</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.7; margin-bottom: 16px;">
+                        支持双人对战和人机对战模式，三种AI难度可选。Canvas渲染精美棋盘，包含计时系统、悔棋功能和胜利动画。
+                    </p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                        <span class="tag">双人对战</span>
+                        <span class="tag">AI对战</span>
+                        <span class="tag">三种难度</span>
+                    </div>
+                    <span class="btn-primary" style="font-size: 13px; padding: 8px 20px;">
+                        <i class="ri-play-circle-line"></i> 开始游戏
+                    </span>
+                </div>
+
+                <!-- 更多游戏占位 -->
+                <div class="card" style="opacity: 0.5; cursor: default;">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1)); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; color: #818cf8;"><i class="ri-puzzle-line"></i></div>
+                        <div>
+                            <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">更多游戏</h3>
+                            <span style="font-size: 13px; color: var(--text-tertiary);">敬请期待</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.7;">
+                        更多轻量级小游戏正在开发中，包括数独、2048等经典益智游戏。
+                    </p>
+                    <div style="margin-top: 16px;">
+                        <span style="font-size: 13px; padding: 8px 20px; background: var(--bg-tertiary); border-radius: 10px; color: var(--text-tertiary);">即将推出</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 五子棋游戏区域 -->
+            <div id="game-area" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <h2 style="font-size: 20px; font-weight: 600; color: var(--text-primary);"><i class="ri-goblet-line" style="color: var(--accent-blue);"></i> 五子棋</h2>
+                    <button id="close-game" class="btn-ghost" style="font-size: 13px; padding: 6px 16px;">
+                        <i class="ri-close-line"></i> 关闭游戏
+                    </button>
+                </div>
+                <div style="border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; background: #fff;">
+                    <iframe id="game-iframe" src="" style="width: 100%; height: 800px; border: none;" title="五子棋游戏"></iframe>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script type="module">
+        import { createNav, createFooter, getGlobalLang } from './components/nav.js';
+
+        createNav('games');
+        createFooter();
+
+        const _globalLang = getGlobalLang();
+        const _isEn = _globalLang === 'en';
+
+        // 更新页面静态文本
+        if (_isEn) {
+            document.title = 'Games — Buffett Wisdom';
+            const h1 = document.querySelector('h1');
+            if (h1) h1.innerHTML = '<i class="ri-gamepad-line" style="color: var(--accent-blue);"></i> Casual Games';
+            const desc = h1 ? h1.parentElement.querySelector('p') : null;
+            if (desc) desc.textContent = 'Take a break from studying investment knowledge and enjoy the fun of intellectual games.';
+        }
+
+        const gomokuCard = document.getElementById('gomoku-card');
+        const gameArea = document.getElementById('game-area');
+        const gameIframe = document.getElementById('game-iframe');
+        const closeGame = document.getElementById('close-game');
+
+        gomokuCard.addEventListener('click', () => {
+            gameIframe.src = '/games/gomoku/index.html';
+            gameArea.style.display = 'block';
+            gameArea.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        closeGame.addEventListener('click', () => {
+            gameArea.style.display = 'none';
+            gameIframe.src = '';
+        });
+    </script>
+</body>
+</html>

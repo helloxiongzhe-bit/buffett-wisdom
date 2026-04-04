@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head><script src="https://with.woa.com/d2c/assets/iframe.js?_t=1775325793615"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股东大会 — Buffett Wisdom</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <style id="critical-css">
+        html, body { background-color: #0a0a0f; }
+        html[data-theme="light"], html[data-theme="light"] body { background-color: #fafafa; }
+    </style>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('buffett-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+    <style>
+        .meeting-video-thumb {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            margin-top: 16px;
+            background: var(--bg-tertiary);
+            aspect-ratio: 16/9;
+            max-width: 420px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .meeting-video-thumb:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 24px rgba(239,68,68,0.1);
+        }
+        .meeting-video-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .meeting-video-thumb:hover img {
+            transform: scale(1.08);
+        }
+        .meeting-video-thumb .play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
+            transition: all 0.4s ease;
+        }
+        .meeting-video-thumb:hover .play-overlay {
+            background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 100%);
+        }
+        .meeting-video-thumb .play-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 0 rgba(255,255,255,0.3);
+        }
+        .meeting-video-thumb:hover .play-btn {
+            transform: scale(1.15);
+            box-shadow: 0 6px 28px rgba(0,0,0,0.35), 0 0 0 8px rgba(255,255,255,0.1);
+            background: #fff;
+        }
+        .meeting-video-thumb .play-btn i {
+            font-size: 24px;
+            color: #ef4444;
+            margin-left: 3px;
+        }
+        .meeting-video-thumb .video-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 24px 14px 12px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .meeting-video-thumb .video-label-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+        .meeting-video-thumb .duration-badge {
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .meeting-video-thumb .live-dot {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(239,68,68,0.9);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+            backdrop-filter: blur(4px);
+        }
+        .meeting-video-thumb .live-dot::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fff;
+            animation: livePulse 1.5s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body class="grid-bg">
+    <div class="radial-glow"></div>
+    <div style="padding-top: 80px;" class="page-enter">
+        <section style="max-width: 1280px; margin: 0 auto; padding: 0 24px 80px;">
+            <div style="margin-bottom: 48px;">
+                <h1 style="font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; color: var(--text-primary); margin-bottom: 12px;">
+                    <i class="ri-mic-line" style="color: var(--accent-blue);"></i> 股东大会发言实录
+                </h1>
+                <p style="color: var(--text-secondary); font-size: 15px; max-width: 600px;">
+                    覆盖1994年至今的伯克希尔·哈撒韦年度股东大会，记录巴菲特和芒格的精彩问答。
+                </p>
+            </div>
+
+            <div style="margin-bottom: 32px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <div class="tab-group">
+                    <button class="tab-btn active" id="lang-zh" data-lang="zh">中文</button>
+                    <button class="tab-btn" id="lang-en" data-lang="en">English</button>
+                </div>
+            </div>
+
+            <div id="meetings-list" class="timeline"></div>
+        </section>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div id="meeting-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:100; overflow-y:auto; padding: 24px;">
+        <div style="max-width: 900px; margin: 40px auto; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; padding: 40px; position: relative;">
+            <button id="modal-close" style="position:absolute; top:16px; right:16px; background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:24px; padding:8px; border-radius:8px;">
+                <i class="ri-close-line"></i>
+            </button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <!-- 视频播放弹窗 -->
+    <div id="video-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:200; align-items:center; justify-content:center; padding: 24px;">
+        <div style="max-width: 960px; width: 100%; position: relative;">
+            <button id="video-modal-close" style="position:absolute; top:-40px; right:0; background:none; border:none; color:#fff; cursor:pointer; font-size:28px; padding:4px;">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="video-container" id="video-player"></div>
+            <div id="video-info" style="margin-top: 16px;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createNav, createFooter, initRevealAnimations, getGlobalLang, setGlobalLang } from './components/nav.js';
+        import { getAllMeetings, getMeetingByYear } from './data/meetings.js';
+
+        createNav('meetings');
+        createFooter();
+
+        // 将弹窗移出 page-wrapper（page-wrapper 的 will-change: transform 会破坏 fixed 定位）
+        ['meeting-modal', 'video-modal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.parentElement && el.parentElement.id === 'page-wrapper') {
+                document.body.appendChild(el);
+            }
+        });
+
+        let currentLang = getGlobalLang();
+        const allMeetings = getAllMeetings();
+
+        // 初始化语言Tab按钮状态
+        if (currentLang === 'en') {
+            document.getElementById('lang-zh').classList.remove('active');
+            document.getElementById('lang-en').classList.add('active');
+        }
+
+        function renderMeetings() {
+            const container = document.getElementById('meetings-list');
+            container.innerHTML = allMeetings.map(meeting => {
+                const summary = currentLang === 'zh' ? meeting.summary : (meeting.summaryEn || meeting.summary);
+                const hasDetail = meeting.contentZh || meeting.contentEn;
+                const hasVideo = !!meeting.youtubeId;
+                return `
+                    <div class="timeline-item reveal">
+                        <div class="card" style="cursor: ${hasDetail ? 'pointer' : 'default'}; margin-bottom: 8px;" ${hasDetail ? `data-year="${meeting.year}"` : ''}>
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                                <span class="year-badge">${meeting.year}</span>
+                                <span style="color: var(--text-tertiary); font-size: 13px;">${meeting.date}</span>
+                                ${hasDetail ? '<span class="tag" style="font-size: 11px;"><i class="ri-file-text-line"></i> 查看详情</span>' : ''}
+                                ${hasVideo ? '<span class="tag" style="font-size: 11px; background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.2);"><i class="ri-play-circle-line"></i> 视频回放</span>' : ''}
+                            </div>
+                            <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.7;">${summary}</p>
+                            ${meeting.highlights ? `
+                            <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+                                ${meeting.highlights.slice(0, 2).map(h => `
+                                    <div style="padding: 12px 16px; background: var(--bg-tertiary); border-radius: 10px; border-left: 3px solid var(--accent-blue);">
+                                        <div style="font-size: 12px; color: var(--accent-blue); margin-bottom: 4px; font-weight: 500;">${h.speaker} · ${h.topic}</div>
+                                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">${h.content.substring(0, 80)}...</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            ${hasVideo ? `
+                            <div class="meeting-video-thumb" data-video-id="${meeting.youtubeId}" data-video-title="${meeting.year}年股东大会">
+                                <img src="https://img.youtube.com/vi/${meeting.youtubeId}/hqdefault.jpg" alt="${meeting.year}年股东大会视频" loading="lazy" onerror="if(!this.dataset.retry){this.dataset.retry='1';this.src='https://img.youtube.com/vi/${meeting.youtubeId}/mqdefault.jpg';}else{this.style.display='none';}">
+                                <div class="play-overlay">
+                                    <div class="play-btn">
+                                        <i class="ri-play-fill" style="font-size: 24px; color: #ef4444; margin-left: 3px;"></i>
+                                    </div>
+                                </div>
+                                <span class="live-dot"><i class="ri-youtube-fill" style="font-size: 12px;"></i> YouTube</span>
+                                <div class="video-label">
+                                    <span class="video-label-text">${meeting.year} 股东大会完整回放</span>
+                                    <span class="duration-badge">${meeting.videoDuration}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            ${meeting.tags ? `<div style="display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap;">${meeting.tags.map(t => `<span style="font-size: 11px; padding: 2px 8px; background: var(--bg-tertiary); border-radius: 12px; color: var(--text-tertiary);">${t}</span>`).join('')}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 绑定文字详情点击
+            container.querySelectorAll('[data-year]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    // 如果点击的是视频缩略图区域，不触发详情弹窗
+                    if (e.target.closest('.meeting-video-thumb')) return;
+                    showMeetingDetail(parseInt(el.dataset.year));
+                });
+            });
+
+            // 绑定视频播放点击
+            container.querySelectorAll('.meeting-video-thumb').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    playVideo(el.dataset.videoId, el.dataset.videoTitle);
+                });
+            });
+
+            initRevealAnimations();
+        }
+
+        function playVideo(youtubeId, title) {
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('video-player');
+            const info = document.getElementById('video-info');
+
+            player.innerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            info.innerHTML = `<h3 style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px;">${title}</h3>`;
+
+            modal.style.display = 'flex';
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('video-player');
+            player.innerHTML = '';
+            modal.style.display = 'none';
+        }
+
+        document.getElementById('video-modal-close').addEventListener('click', closeVideoModal);
+        document.getElementById('video-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('video-modal')) closeVideoModal();
+        });
+
+        function showMeetingDetail(year) {
+            const meeting = getMeetingByYear(year);
+            if (!meeting || (!meeting.contentZh && !meeting.contentEn)) return;
+
+            const modal = document.getElementById('meeting-modal');
+            const content = document.getElementById('modal-content');
+            const mainContent = currentLang === 'zh' ? (meeting.contentZh || meeting.contentEn) : (meeting.contentEn || meeting.contentZh);
+
+            content.innerHTML = `
+                <div style="margin-bottom: 24px;">
+                    <span class="year-badge" style="margin-bottom: 12px; display: inline-block;">${year}</span>
+                    <h2 style="font-family: var(--font-serif); font-size: 1.8rem; font-weight: 600; color: var(--text-primary); margin: 12px 0 8px;">${year}年股东大会</h2>
+                    <p style="color: var(--text-tertiary); font-size: 13px;">${meeting.date} · 奥马哈</p>
+                </div>
+
+                ${meeting.youtubeId ? `
+                <div style="margin-bottom: 24px;">
+                    <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;"><i class="ri-play-circle-line" style="color: #ef4444;"></i> 大会视频回放</h3>
+                    <div class="video-container" style="border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);">
+                        <iframe src="https://www.youtube.com/embed/${meeting.youtubeId}?rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${meeting.highlights ? `
+                <div style="margin-bottom: 32px;">
+                    <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;"><i class="ri-lightbulb-line" style="color: var(--accent-blue);"></i> 精彩发言</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        ${meeting.highlights.map(h => `
+                            <div class="quote-block" style="border-left-color: ${h.speaker === '芒格' ? '#8b5cf6' : 'var(--accent-blue)'};">
+                                <div style="font-size: 13px; font-weight: 600; color: ${h.speaker === '芒格' ? '#8b5cf6' : 'var(--accent-blue)'}; margin-bottom: 8px; font-style: normal;">${h.speaker} · ${h.topic}</div>
+                                <p style="font-size: 14px; line-height: 1.8; font-style: normal; color: var(--text-secondary);">${h.content}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="divider"></div>
+                <div class="content-area" style="white-space: pre-wrap; font-size: 15px; line-height: 1.9;">${mainContent.replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')}</div>
+
+                ${meeting.contentZh && meeting.contentEn ? `
+                <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); display: flex; gap: 8px;">
+                    <button class="btn-ghost modal-lang-btn" data-lang="zh" style="font-size: 13px; padding: 6px 16px;">中文版</button>
+                    <button class="btn-ghost modal-lang-btn" data-lang="en" style="font-size: 13px; padding: 6px 16px;">English</button>
+                </div>
+                ` : ''}
+            `;
+
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+
+            content.querySelectorAll('.modal-lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    const text = lang === 'zh' ? meeting.contentZh : meeting.contentEn;
+                    content.querySelector('.content-area').innerHTML = text.replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>');
+                });
+            });
+        }
+
+        function closeMeetingModal() {
+            document.getElementById('meeting-modal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        document.getElementById('modal-close').addEventListener('click', closeMeetingModal);
+        document.getElementById('meeting-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('meeting-modal')) {
+                closeMeetingModal();
+            }
+        });
+
+        document.querySelectorAll('.tab-btn[data-lang]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn[data-lang]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLang = btn.dataset.lang;
+                setGlobalLang(currentLang);
+                updateMeetingsStaticTexts();
+                renderMeetings();
+            });
+        });
+
+        // 更新页面静态文本
+        function updateMeetingsStaticTexts() {
+            const isEn = currentLang === 'en';
+            const h1 = document.querySelector('h1');
+            const desc = document.querySelector('h1 + p');
+            if (h1) h1.innerHTML = `<i class="ri-mic-line" style="color: var(--accent-blue);"></i> ${isEn ? 'Annual Meeting Transcripts' : '股东大会发言实录'}`;
+            if (desc) desc.textContent = isEn ? 'Berkshire Hathaway annual meetings from 1994 to present, featuring Q&A highlights from Buffett and Munger.' : '覆盖1994年至今的伯克希尔·哈撒韦年度股东大会，记录巴菲特和芒格的精彩问答。';
+            document.title = isEn ? 'Annual Meetings — Buffett Wisdom' : '股东大会 — Buffett Wisdom';
+        }
+
+        updateMeetingsStaticTexts();
+        renderMeetings();
+    </script>
+</body>
+</html>

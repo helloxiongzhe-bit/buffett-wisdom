@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head><script src="https://with.woa.com/d2c/assets/iframe.js?_t=1775325793774"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>名词解释 — Buffett Wisdom</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <style id="critical-css">
+        html, body { background-color: #0a0a0f; }
+        html[data-theme="light"], html[data-theme="light"] body { background-color: #fafafa; }
+    </style>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('buffett-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+</head>
+<body class="grid-bg">
+    <div class="radial-glow"></div>
+    <div style="padding-top: 80px;" class="page-enter">
+        <section style="max-width: 1280px; margin: 0 auto; padding: 0 24px 80px;">
+            <div style="margin-bottom: 48px;">
+                <h1 style="font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; color: var(--text-primary); margin-bottom: 12px;">
+                    <i class="ri-book-open-line" style="color: var(--accent-blue);"></i> 名词解释
+                </h1>
+                <p style="color: var(--text-secondary); font-size: 15px; max-width: 600px;">
+                    投资术语词典，涵盖巴菲特投资体系中的核心概念。中文为主，关键概念附英文注释。
+                </p>
+            </div>
+
+            <!-- 搜索 -->
+            <div style="position: relative; margin-bottom: 24px; max-width: 480px;">
+                <i class="ri-search-line" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); font-size: 18px;"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="搜索术语（中文或英文）...">
+            </div>
+
+            <!-- 分类筛选 -->
+            <div class="filter-group" style="margin-bottom: 32px;" id="category-filters"></div>
+
+            <!-- 术语列表 -->
+            <div id="glossary-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+        </section>
+    </div>
+
+    <script type="module">
+        import { createNav, createFooter, initRevealAnimations, getGlobalLang } from './components/nav.js';
+        import { glossaryTerms, glossaryCategories, getTermsByCategory, searchTerms } from './data/glossary.js';
+
+        createNav('glossary');
+        createFooter();
+
+        const _globalLang = getGlobalLang();
+        const _isEn = _globalLang === 'en';
+
+        // 更新页面静态文本
+        if (_isEn) {
+            document.title = 'Glossary — Buffett Wisdom';
+            const h1 = document.querySelector('h1');
+            if (h1) h1.innerHTML = '<i class="ri-book-open-line" style="color: var(--accent-blue);"></i> Glossary';
+            const desc = document.querySelector('h1').nextElementSibling;
+            if (desc && desc.tagName === 'P') desc.textContent = "Investment terms dictionary covering core concepts in Buffett's investment system. English terms with Chinese annotations.";
+            document.getElementById('search-input').placeholder = 'Search terms (Chinese or English)...';
+        }
+
+        let currentCategory = '全部';
+        let searchQuery = '';
+
+        // 渲染分类按钮
+        const filtersContainer = document.getElementById('category-filters');
+        filtersContainer.innerHTML = glossaryCategories.map(cat =>
+            `<button class="filter-btn ${cat === '全部' ? 'active' : ''}" data-category="${cat}">${cat}</button>`
+        ).join('');
+
+        filtersContainer.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                filtersContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.category;
+                renderTerms();
+            });
+        });
+
+        // 搜索
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            searchQuery = e.target.value.trim();
+            renderTerms();
+        });
+
+        function renderTerms() {
+            let terms;
+            if (searchQuery) {
+                terms = searchTerms(searchQuery);
+            } else {
+                terms = getTermsByCategory(currentCategory);
+            }
+
+            const container = document.getElementById('glossary-list');
+            if (terms.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 60px 0; color: var(--text-tertiary);">
+                    <i class="ri-search-line" style="font-size: 48px; display: block; margin-bottom: 16px;"></i>
+                    <p>未找到匹配的术语</p>
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = terms.map(term => `
+                <div class="card reveal" style="cursor: default;">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <div>
+                            <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${_isEn ? term.termEn : term.term}</h3>
+                            <span style="font-size: 13px; color: var(--accent-blue); font-family: var(--font-mono);">${_isEn ? term.term : term.termEn}</span>
+                        </div>
+                        <span style="font-size: 12px; padding: 4px 12px; background: var(--bg-tertiary); border-radius: 20px; color: var(--text-tertiary); white-space: nowrap;">${term.category}</span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8; margin-bottom: 12px;">${term.definition}</p>
+                    ${term.example ? `
+                    <div style="padding: 12px 16px; background: var(--bg-tertiary); border-radius: 10px; border-left: 3px solid var(--accent-blue);">
+                        <span style="font-size: 12px; color: var(--accent-blue); font-weight: 500;"><i class="ri-lightbulb-line"></i> 示例</span>
+                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-top: 4px;">${term.example}</p>
+                    </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            initRevealAnimations();
+        }
+
+        renderTerms();
+    </script>
+</body>
+</html>
