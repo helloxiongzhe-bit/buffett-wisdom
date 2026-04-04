@@ -131,7 +131,7 @@
             const player = document.getElementById('video-player');
             const info = document.getElementById('video-info');
 
-            player.innerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            player.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
             info.innerHTML = `<h3 style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px;">${title}</h3>`;
 
             modal.style.display = 'flex';
