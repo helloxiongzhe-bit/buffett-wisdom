@@ -230,7 +230,7 @@ export function createNav(activePage = '') {
     navPanel.innerHTML = `
         <div class="nav-panel-inner">
             <div class="nav-panel-header">
-                <a href="/index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+                <a href="index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
                     <div style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--accent-gradient); flex-shrink: 0;">
                         <span style="font-size:18px; color: #fff;"><i class="ri-bar-chart-box-line"></i></span>
                     </div>
@@ -241,7 +241,7 @@ export function createNav(activePage = '') {
                 </button>
             </div>
             <nav class="nav-panel-links">
-                <a href="/index.html" class="nav-panel-link ${activePage === 'home' ? 'active' : ''}" data-index="0">
+                <a href="index.html" class="nav-panel-link ${activePage === 'home' ? 'active' : ''}" data-index="0">
                     <div class="nav-panel-link-icon"><i class="ri-home-4-line"></i></div>
                     <div class="nav-panel-link-text">
                         <span class="nav-panel-link-title">${_isEn ? 'Home' : '首页'}</span>
@@ -249,7 +249,7 @@ export function createNav(activePage = '') {
                     </div>
                     <i class="ri-arrow-right-s-line nav-panel-link-arrow"></i>
                 </a>
-                <a href="/letters.html" class="nav-panel-link ${activePage === 'letters' ? 'active' : ''}" data-index="1">
+                <a href="letters.html" class="nav-panel-link ${activePage === 'letters' ? 'active' : ''}" data-index="1">
                     <div class="nav-panel-link-icon"><i class="ri-file-text-line"></i></div>
                     <div class="nav-panel-link-text">
                         <span class="nav-panel-link-title">${_isEn ? 'Letters' : '股东信'}</span>
@@ -257,7 +257,7 @@ export function createNav(activePage = '') {
                     </div>
                     <i class="ri-arrow-right-s-line nav-panel-link-arrow"></i>
                 </a>
-                <a href="/meetings.html" class="nav-panel-link ${activePage === 'meetings' ? 'active' : ''}" data-index="2">
+                <a href="meetings.html" class="nav-panel-link ${activePage === 'meetings' ? 'active' : ''}" data-index="2">
                     <div class="nav-panel-link-icon"><i class="ri-mic-line"></i></div>
                     <div class="nav-panel-link-text">
                         <span class="nav-panel-link-title">${_isEn ? 'Meetings' : '股东大会'}</span>
@@ -265,7 +265,7 @@ export function createNav(activePage = '') {
                     </div>
                     <i class="ri-arrow-right-s-line nav-panel-link-arrow"></i>
                 </a>
-                <a href="/glossary.html" class="nav-panel-link ${activePage === 'glossary' ? 'active' : ''}" data-index="3">
+                <a href="glossary.html" class="nav-panel-link ${activePage === 'glossary' ? 'active' : ''}" data-index="3">
                     <div class="nav-panel-link-icon"><i class="ri-book-2-line"></i></div>
                     <div class="nav-panel-link-text">
                         <span class="nav-panel-link-title">${_isEn ? 'Glossary' : '名词解释'}</span>
@@ -273,7 +273,7 @@ export function createNav(activePage = '') {
                     </div>
                     <i class="ri-arrow-right-s-line nav-panel-link-arrow"></i>
                 </a>
-                <a href="/people.html" class="nav-panel-link ${activePage === 'people' ? 'active' : ''}" data-index="4">
+                <a href="people.html" class="nav-panel-link ${activePage === 'people' ? 'active' : ''}" data-index="4">
                     <div class="nav-panel-link-icon"><i class="ri-user-star-line"></i></div>
                     <div class="nav-panel-link-text">
                         <span class="nav-panel-link-title">${_isEn ? 'People' : '人物简介'}</span>
@@ -281,7 +281,7 @@ export function createNav(activePage = '') {
                     </div>
                     <i class="ri-arrow-right-s-line nav-panel-link-arrow"></i>
                 </a>
-                <a href="/games.html" class="nav-panel-link ${activePage === 'games' ? 'active' : ''}" data-index="5">
+                <a href="games.html" class="nav-panel-link ${activePage === 'games' ? 'active' : ''}" data-index="5">
                     <div class="nav-panel-link-icon"><i class="ri-gamepad-line"></i></div>
                     <div class="nav-panel-link-text">
                         <span class="nav-panel-link-title">${_isEn ? 'Games' : '下个棋'}</span>
@@ -312,7 +312,7 @@ export function createNav(activePage = '') {
                 <span class="hamburger-line"></span>
                 <span class="hamburger-line"></span>
             </button>
-            <a href="/index.html" class="top-bar-logo" style="text-decoration: none;">
+            <a href="index.html" class="top-bar-logo" style="text-decoration: none;">
                 <div style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--accent-gradient); flex-shrink: 0;">
                     <span style="font-size:14px; color: #fff;"><i class="ri-bar-chart-box-line"></i></span>
                 </div>
@@ -675,12 +675,12 @@ export function createFooter() {
     footer.innerHTML = `
         <div style="max-width: 1280px; margin: 0 auto;">
             <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-bottom: 24px;">
-                <a href="/index.html" class="nav-link"><i class="ri-home-4-line"></i> ${_isEn ? 'Home' : '首页'}</a>
-                <a href="/letters.html" class="nav-link"><i class="ri-file-text-line"></i> ${_isEn ? 'Letters' : '股东信'}</a>
-                <a href="/meetings.html" class="nav-link"><i class="ri-mic-line"></i> ${_isEn ? 'Meetings' : '股东大会'}</a>
-                <a href="/glossary.html" class="nav-link"><i class="ri-book-2-line"></i> ${_isEn ? 'Glossary' : '名词解释'}</a>
-                <a href="/people.html" class="nav-link"><i class="ri-user-star-line"></i> ${_isEn ? 'People' : '人物简介'}</a>
-                <a href="/games.html" class="nav-link"><i class="ri-gamepad-line"></i> ${_isEn ? 'Games' : '休闲游戏'}</a>
+                <a href="index.html" class="nav-link"><i class="ri-home-4-line"></i> ${_isEn ? 'Home' : '首页'}</a>
+                <a href="letters.html" class="nav-link"><i class="ri-file-text-line"></i> ${_isEn ? 'Letters' : '股东信'}</a>
+                <a href="meetings.html" class="nav-link"><i class="ri-mic-line"></i> ${_isEn ? 'Meetings' : '股东大会'}</a>
+                <a href="glossary.html" class="nav-link"><i class="ri-book-2-line"></i> ${_isEn ? 'Glossary' : '名词解释'}</a>
+                <a href="people.html" class="nav-link"><i class="ri-user-star-line"></i> ${_isEn ? 'People' : '人物简介'}</a>
+                <a href="games.html" class="nav-link"><i class="ri-gamepad-line"></i> ${_isEn ? 'Games' : '休闲游戏'}</a>
             </div>
             <p style="color: var(--text-tertiary); font-size: 13px; line-height: 1.6;">
                 ${_isEn ? 'Content is for educational purposes only and does not constitute investment advice.<br>Original shareholder letters are copyrighted by Berkshire Hathaway Inc.' : '本站内容仅供学习研究使用，不构成投资建议。<br>股东信原文版权归 Berkshire Hathaway Inc. 所有。'}
