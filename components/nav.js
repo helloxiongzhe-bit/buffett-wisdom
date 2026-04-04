@@ -294,9 +294,6 @@ export function createNav(activePage = '') {
                 <button id="nav-theme-toggle" class="nav-panel-theme-btn">
                     <i class="ri-moon-line"></i> <span>${_isEn ? 'Toggle Theme' : '切换主题'}</span>
                 </button>
-                <p style="color: var(--text-tertiary); font-size: 11px; margin-top: 16px; text-align: center;">
-                    由 <a href="https://with.woa.com/" style="color: #8B5CF6;" target="_blank">With</a> 通过自然语言生成
-                </p>
             </div>
         </div>
     `;
@@ -684,9 +681,6 @@ export function createFooter() {
             </div>
             <p style="color: var(--text-tertiary); font-size: 13px; line-height: 1.6;">
                 ${_isEn ? 'Content is for educational purposes only and does not constitute investment advice.<br>Original shareholder letters are copyrighted by Berkshire Hathaway Inc.' : '本站内容仅供学习研究使用，不构成投资建议。<br>股东信原文版权归 Berkshire Hathaway Inc. 所有。'}
-            </p>
-            <p style="color: var(--text-tertiary); font-size: 12px; margin-top: 12px;">
-                由 <a href="https://with.woa.com/" style="color: #8B5CF6;" target="_blank">With</a> 通过自然语言生成
             </p>
         </div>
     `;
