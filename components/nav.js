@@ -75,7 +75,12 @@ function navigateWithTransition(href) {
     if (isTransitioning) return;
     // 如果目标就是当前页面，不跳转
     const targetPath = new URL(href, window.location.href).pathname;
-    if (targetPath === window.location.pathname) return;
+    const currentPath = window.location.pathname;
+    // 处理 GitHub Pages 子目录路径
+    const normalizePath = (path) => {
+        return path.replace(/\/$/, '') || '/';
+    };
+    if (normalizePath(targetPath) === normalizePath(currentPath)) return;
 
     isTransitioning = true;
     const bar = createTransitionBar();
@@ -102,7 +107,9 @@ function navigateWithTransition(href) {
 
     // 使用 fetch 预加载目标页面
     let pageReady = false;
-    const preloadPromise = fetch(href, { mode: 'same-origin', credentials: 'same-origin' })
+    // 确保使用完整的 URL 路径
+    const fetchUrl = new URL(href, window.location.href).href;
+    const preloadPromise = fetch(fetchUrl, { mode: 'same-origin', credentials: 'same-origin' })
         .then(resp => {
             if (!resp.ok) throw new Error('Load failed');
             return resp.text();

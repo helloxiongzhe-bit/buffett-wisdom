@@ -276,7 +276,7 @@
             const player = document.getElementById('video-player');
             const info = document.getElementById('video-info');
 
-            player.innerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            player.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
             info.innerHTML = `<h3 style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px;">${title}</h3>`;
 
             modal.style.display = 'flex';
@@ -313,7 +313,7 @@
                 <div style="margin-bottom: 24px;">
                     <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;"><i class="ri-play-circle-line" style="color: #ef4444;"></i> 大会视频回放</h3>
                     <div class="video-container" style="border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);">
-                        <iframe src="https://www.youtube.com/embed/${meeting.youtubeId}?rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <iframe src="https://www.youtube-nocookie.com/embed/${meeting.youtubeId}?rel=0&modestbranding=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
                 </div>
                 ` : ''}
