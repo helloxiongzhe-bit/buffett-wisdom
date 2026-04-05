@@ -319,6 +319,7 @@ export function createNav(activePage = '') {
                     <i class="ri-moon-line"></i> <span>${_isEn ? 'Toggle Theme' : '切换主题'}</span>
                 </button>
             </div>
+            <!-- 主题切换按钮图标将由 initTheme() 动态更新 -->
         </div>
     `;
 
@@ -493,25 +494,35 @@ export function initTheme() {
     }, 0);
 }
 
+// 三态主题循环：light(太阳) → zen(禅) → dark(月亮) → light...
+const THEME_CYCLE = ['light', 'zen', 'dark'];
+
 function toggleTheme() {
     const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
+    const idx = THEME_CYCLE.indexOf(current);
+    const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('buffett-theme', next);
     updateThemeIcon(next);
 }
 
+const THEME_ICON_MAP = {
+    light: { icon: 'ri-sun-line',       label: '太阳模式' },
+    zen:   { icon: 'ri-leaf-line',       label: '禅模式' },
+    dark:  { icon: 'ri-moon-line',       label: '月亮模式' },
+};
+
 function updateThemeIcon(theme) {
     setTimeout(() => {
+        const info = THEME_ICON_MAP[theme] || THEME_ICON_MAP.dark;
         const btn = document.getElementById('theme-toggle');
         if (btn) {
-            btn.innerHTML = theme === 'dark' ? '<i class="ri-moon-line"></i>' : '<i class="ri-sun-line"></i>';
+            btn.innerHTML = `<i class="${info.icon}"></i>`;
+            btn.title = info.label;
         }
         const navBtn = document.getElementById('nav-theme-toggle');
         if (navBtn) {
-            navBtn.innerHTML = theme === 'dark'
-                ? '<i class="ri-moon-line"></i> <span>切换主题</span>'
-                : '<i class="ri-sun-line"></i> <span>切换主题</span>';
+            navBtn.innerHTML = `<i class="${info.icon}"></i> <span>${info.label}</span>`;
         }
     }, 0);
 }

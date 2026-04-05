@@ -30,6 +30,7 @@
     <style id="critical-css">
         html, body { background-color: #F5F1EB; }
         html[data-theme="dark"], html[data-theme="dark"] body { background-color: #1C1A17; }
+        html[data-theme="zen"], html[data-theme="zen"] body { background-color: #1C1A17; }
     </style>
     <script>
         (function() {
@@ -81,7 +82,7 @@
             --glass-border: #E0DBD0 !important;
             --grid-color: transparent !important;
         }
-        [data-theme="dark"] {
+        [data-theme="dark"], [data-theme="zen"] {
             --g-bg: #1C1A17;
             --g-text: #E8E0D4;
             --g-text-sub: #A09A8A;
@@ -515,7 +516,8 @@
             pointer-events: none;
             transition: opacity 0.4s ease;
         }
-        html[data-theme="dark"] .modal-overlay {
+        html[data-theme="dark"] .modal-overlay,
+        html[data-theme="zen"] .modal-overlay {
             background: rgba(28, 26, 23, 0.85);
         }
 

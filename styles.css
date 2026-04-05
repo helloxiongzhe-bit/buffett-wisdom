@@ -65,6 +65,201 @@
     --grid-color: rgba(0, 0, 0, 0.02);
 }
 
+/* ===== 禅模式 (Zen / 侘寂暖金色调) ===== */
+/* 配色取自五子棋棋盘：深褐背景 + 暖灰褐强调 + 米色文字 */
+[data-theme="zen"] {
+    --bg-primary: #1C1A17;
+    --bg-secondary: #232019;
+    --bg-tertiary: #2A2720;
+    --bg-card: rgba(232, 224, 208, 0.025);
+    --bg-card-hover: rgba(232, 224, 208, 0.04);
+    --border-color: rgba(200, 190, 170, 0.10);
+    --border-hover: rgba(200, 190, 170, 0.16);
+    --text-primary: #D8D0C0;
+    --text-secondary: #9E9686;
+    --text-tertiary: #746E62;
+    --accent-blue: #A09080;
+    --accent-purple: #8B7D6B;
+    --accent-gradient: linear-gradient(135deg, #A09080, #8B7D6B);
+    --accent-glow: rgba(160, 144, 128, 0.10);
+    --glass-bg: rgba(28, 26, 23, 0.88);
+    --glass-border: rgba(200, 190, 170, 0.08);
+    --font-sans: 'LXGW WenKai', 'Noto Serif SC', 'Inter', 'DM Sans', system-ui, -apple-system, sans-serif;
+    --font-serif: 'Noto Serif SC', 'LXGW WenKai', 'Playfair Display', Georgia, serif;
+    --grid-color: transparent;
+}
+
+/* 禅模式 - 径向光晕改为暖褐 */
+[data-theme="zen"] .radial-glow {
+    background: radial-gradient(ellipse, rgba(160, 144, 128, 0.05) 0%, rgba(139, 125, 107, 0.02) 40%, transparent 70%);
+}
+
+/* 禅模式 - 鼠标光标跟随为暖褐 */
+[data-theme="zen"] .cursor-glow {
+    background: radial-gradient(circle, rgba(160, 144, 128, 0.025) 0%, transparent 70%);
+}
+
+/* 禅模式 - 导航指示器 */
+[data-theme="zen"] .nav-indicator {
+    background: rgba(160, 144, 128, 0.05);
+    border-color: rgba(160, 144, 128, 0.08);
+    box-shadow: 0 0 12px rgba(160, 144, 128, 0.03), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* 禅模式 - 标签 */
+[data-theme="zen"] .tag {
+    background: rgba(160, 144, 128, 0.08);
+    color: #A09080;
+    border-color: rgba(160, 144, 128, 0.15);
+}
+
+/* 禅模式 - 引用块 */
+[data-theme="zen"] .quote-block {
+    border-left-color: #A09080;
+}
+
+[data-theme="zen"] .quote-block::before {
+    color: #A09080;
+}
+
+/* 禅模式 - 搜索框聚焦 */
+[data-theme="zen"] .search-input:focus {
+    border-color: #A09080;
+    box-shadow: 0 0 0 3px rgba(160, 144, 128, 0.10);
+}
+
+/* 禅模式 - Tab按钮 */
+[data-theme="zen"] .tab-btn.active {
+    background: linear-gradient(135deg, #A09080, #8B7D6B);
+}
+
+/* 禅模式 - 筛选按钮 */
+[data-theme="zen"] .filter-btn:hover {
+    border-color: rgba(160, 144, 128, 0.25);
+    background: rgba(160, 144, 128, 0.03);
+    box-shadow: 0 0 12px rgba(160, 144, 128, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="zen"] .filter-btn.active {
+    background: rgba(160, 144, 128, 0.08);
+    border-color: rgba(160, 144, 128, 0.25);
+    color: #A09080;
+}
+
+/* 禅模式 - 时间线 */
+[data-theme="zen"] .timeline-item::before {
+    background: #A09080;
+}
+
+/* 禅模式 - 人物卡片 */
+[data-theme="zen"] .person-card:hover .avatar {
+    box-shadow: 0 8px 30px rgba(160, 144, 128, 0.12);
+    border-color: #A09080;
+}
+
+/* 禅模式 - 统计数字 */
+[data-theme="zen"] .stat-number {
+    background: linear-gradient(135deg, #B8A898, #A09080);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 禅模式 - 文字渐变 */
+[data-theme="zen"] .text-gradient {
+    background: linear-gradient(135deg, #B8A898, #A09080, #8B7D6B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 禅模式 - 卡片悬停（毛玻璃效果） */
+[data-theme="zen"] .card:hover {
+    background: rgba(200, 190, 170, 0.04);
+    border-color: rgba(200, 190, 170, 0.10);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(200, 190, 170, 0.06);
+    transform: translateY(-2px);
+}
+
+[data-theme="zen"] .card:hover::before {
+    background: linear-gradient(135deg, rgba(200, 190, 170, 0.05), transparent 50%, rgba(200, 190, 170, 0.05));
+}
+
+/* 禅模式 - 卡片光晕跟随为暖色 */
+[data-theme="zen"] .card .card-shine {
+    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(200, 190, 170, 0.04), transparent 40%);
+}
+
+/* 禅模式 - 发光卡片（毛玻璃） */
+[data-theme="zen"] .glow-card:hover {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(200, 190, 170, 0.06);
+}
+
+[data-theme="zen"] .glow-card:hover::after {
+    background: linear-gradient(135deg, rgba(160, 144, 128, 0.5), rgba(139, 125, 107, 0.5));
+}
+
+/* 禅模式 - 按钮 */
+[data-theme="zen"] .btn-primary {
+    background: linear-gradient(135deg, #A09080, #8B7D6B);
+}
+
+[data-theme="zen"] .btn-primary:hover {
+    box-shadow: 0 4px 20px rgba(160, 144, 128, 0.30), 0 0 36px rgba(139, 125, 107, 0.10), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+[data-theme="zen"] .btn-ghost:hover {
+    border-color: rgba(160, 144, 128, 0.30);
+    background: rgba(160, 144, 128, 0.04);
+    box-shadow: 0 0 16px rgba(160, 144, 128, 0.06), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 0 0 1px rgba(160, 144, 128, 0.06);
+}
+
+/* 禅模式 - 导航链接 */
+[data-theme="zen"] .nav-panel-link:hover .nav-panel-link-icon {
+    background: rgba(160, 144, 128, 0.10);
+    border-color: rgba(160, 144, 128, 0.16);
+    color: #A09080;
+}
+
+[data-theme="zen"] .nav-panel-link.active {
+    background: rgba(160, 144, 128, 0.08);
+}
+
+[data-theme="zen"] .nav-panel-link.active .nav-panel-link-icon {
+    background: linear-gradient(135deg, #A09080, #8B7D6B);
+    border-color: transparent;
+    color: #fff;
+}
+
+[data-theme="zen"] .nav-panel-link.active .nav-panel-link-title {
+    color: #B8A898;
+}
+
+/* 禅模式 - 进度条和过渡 */
+[data-theme="zen"] .scroll-progress {
+    background: linear-gradient(135deg, #A09080, #8B7D6B);
+}
+
+[data-theme="zen"] .page-transition-bar {
+    background: linear-gradient(135deg, #A09080, #8B7D6B);
+    box-shadow: 0 0 10px rgba(160, 144, 128, 0.5), 0 0 20px rgba(139, 125, 107, 0.25);
+}
+
+[data-theme="zen"] .page-transition-bar::after {
+    background: linear-gradient(to left, rgba(160, 144, 128, 0.7), transparent);
+}
+
+[data-theme="zen"] .transition-dots span {
+    background: linear-gradient(135deg, #A09080, #8B7D6B);
+}
+
 /* ===== Reset & Base ===== */
 *, *::before, *::after {
     margin: 0;
@@ -1355,6 +1550,11 @@ a.stat-item:hover::after {
 /* 浅色模式：太阳图标用强调色 */
 [data-theme="light"] .theme-toggle-btn {
     color: #f59e0b;
+}
+
+/* 禅模式：叶子图标用暖灰褐色 */
+[data-theme="zen"] .theme-toggle-btn {
+    color: #B8A898;
 }
 
 /* 兼容 #theme-toggle 选择器 */

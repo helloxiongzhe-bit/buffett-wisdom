@@ -205,13 +205,14 @@
 
         /* ============================================
            移动端响应式（vivo X200 Pro Mini: ~393×873）
+           Chrome 浏览器实际可用高度约 700-730px
            ============================================ */
-        @media (max-height: 700px) {
+        @media (max-height: 750px) {
             #game-container {
                 padding: 4px 8px;
             }
             .header-row {
-                margin-bottom: 4px;
+                margin-bottom: 2px;
             }
             .header-row h1 {
                 font-size: 1.5rem;
@@ -222,6 +223,9 @@
             .score-row .score-box {
                 min-width: 64px;
                 padding: 3px 8px 4px !important;
+            }
+            .score-row .score-box .text-xs {
+                font-size: 0.5rem;
             }
             .score-row .score-box .score-value-display,
             .score-row .score-digit {
@@ -237,23 +241,39 @@
                 height: 1.5rem;
             }
             .btn-row {
-                margin-bottom: 4px;
+                margin-bottom: 2px;
             }
             .btn-row .action-btn {
                 padding: 4px 8px;
                 font-size: 11px;
             }
             .stats-row {
-                margin-top: 4px;
+                margin-top: 2px;
             }
             .stats-row .stat-card {
-                padding: 4px 6px;
+                padding: 3px 6px;
             }
             .stats-row .stat-card .label {
                 font-size: 9px;
             }
             .stats-row .stat-card .value {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
+            }
+            .hint-row {
+                margin-top: 2px;
+            }
+        }
+
+        /* 极小高度（Chrome 地址栏展开、横屏等） */
+        @media (max-height: 640px) {
+            .header-row h1 {
+                font-size: 1.3rem;
+            }
+            .stats-row {
+                display: none;
+            }
+            .hint-row {
+                display: none;
             }
         }
 
@@ -329,6 +349,7 @@
             will-change: auto !important;
             min-height: auto !important;
             height: calc(100vh - 56px) !important;
+            height: calc(100dvh - 56px) !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
