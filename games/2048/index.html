@@ -1,0 +1,148 @@
+<!--
+  2048 游戏 - 超级果冻 Q 弹版
+  
+  设计特点：
+    - 无全局导航栏，游戏全屏沉浸体验（通过 iframe 嵌入 games.html）
+    - 深紫色渐变背景 + 动态光效，独立于全局 styles.css 的配色
+    - 毛玻璃棋盘 + 方块渐变色梯度（2→2048 共 11 级配色）
+    - 丰富果冻动画：出现/合并/撞墙/阻挡弹跳
+    - 分数飞行粒子 + 计分板翻转动画
+    - 撤销系统（最多 10 步）/ 连击提示 / 棋盘震动
+    - 支持键盘（方向键/WASD）+ 触摸滑动 + 鼠标拖拽
+-->
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <base href="../../">
+    <title>2048 - 超级果冻版</title>
+
+    <!-- 主题初始化（闪烁预防） -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('buffett-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
+    <!-- 2048 专用字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Nunito:wght@600;700;800;900&family=Noto+Sans+SC:wght@500;700;900&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- 2048 游戏样式 -->
+    <link rel="stylesheet" href="./games/2048/style.css">
+
+    <!-- Tailwind CSS（2048 布局依赖） -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <style>
+        #game-container {
+            padding-top: 12px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center select-none">
+
+  <!-- 游戏容器 -->
+  <div id="game-container" class="w-full max-w-lg px-4 py-6 flex flex-col items-center">
+
+    <!-- 标题区域 -->
+    <div class="w-full flex items-center justify-between mb-4">
+      <div class="flex flex-col">
+        <h1 class="text-5xl font-extrabold tracking-tight">2048</h1>
+        <p class="game-subtitle text-sm font-semibold mt-1">合并数字，挑战2048！</p>
+      </div>
+      <div class="flex gap-2">
+        <div class="score-box rounded-lg px-4 py-2 text-center min-w-20">
+          <div class="text-xs font-bold uppercase tracking-wider">分数</div>
+          <div id="score" class="score-value-display score-digit-container font-extrabold" data-value="0">0</div>
+        </div>
+        <div class="score-box rounded-lg px-4 py-2 text-center min-w-20">
+          <div class="text-xs font-bold uppercase tracking-wider">最高</div>
+          <div id="best-score" class="score-value-display score-digit-container font-extrabold" data-value="0">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="w-full flex items-center justify-end mb-4">
+      <div class="flex gap-3">
+        <button id="btn-undo" class="action-btn text-white font-bold py-2 px-4 rounded-lg text-sm shadow-md flex items-center gap-1.5" title="撤销">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          撤销
+        </button>
+        <button id="btn-new" class="action-btn text-white font-bold py-2 px-4 rounded-lg text-sm shadow-md flex items-center gap-1.5">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"></path><path d="M2.5 22v-6h6"></path><path d="M2.5 11.5a10 10 0 0 1 18.17-4.5L21.5 8"></path><path d="M21.5 12.5a10 10 0 0 1-18.17 4.5L2.5 16"></path></svg>
+          新游戏
+        </button>
+      </div>
+    </div>
+
+    <!-- 得分动画容器 -->
+    <div id="score-popup-container" class="relative w-full" style="height: 0;"></div>
+
+    <!-- 游戏棋盘 -->
+    <div id="game-board" class="relative rounded-xl overflow-hidden">
+      <!-- 背景格子 -->
+      <div id="grid-background" class="grid-bg"></div>
+      <!-- 特效层 -->
+      <div id="effects-layer" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:2;pointer-events:none;"></div>
+      <!-- 方块容器 -->
+      <div id="tile-container"></div>
+      <!-- 游戏结束遮罩 -->
+      <div id="game-over-overlay" class="game-overlay hidden">
+        <div class="overlay-content">
+          <h2 class="text-4xl font-extrabold mb-2">游戏结束!</h2>
+          <p class="text-lg mb-4">最终得分: <span id="final-score" class="font-bold">0</span></p>
+          <button id="btn-retry" class="text-white font-bold py-3 px-8 rounded-xl text-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
+            再来一局
+          </button>
+        </div>
+      </div>
+      <!-- 胜利遮罩 -->
+      <div id="game-win-overlay" class="game-overlay hidden">
+        <div class="overlay-content">
+          <h2 class="text-4xl font-extrabold mb-2">🎉 你赢了!</h2>
+          <p class="text-lg mb-4">恭喜达到2048!</p>
+          <div class="flex gap-3">
+            <button id="btn-continue" class="text-white font-bold py-3 px-6 rounded-xl text-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
+              继续挑战
+            </button>
+            <button id="btn-win-retry" class="text-white font-bold py-3 px-6 rounded-xl text-lg transition-all duration-200 transform hover:scale-105 shadow-lg" style="background: rgba(100,116,139,0.6) !important;">
+              新游戏
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作提示 -->
+    <div class="w-full mt-4 text-center">
+      <p id="hint-desktop" class="text-xs opacity-60 hidden md:block">使用 ← ↑ → ↓ 方向键操作 | W A S D 也可以哦</p>
+      <p id="hint-mobile" class="text-xs opacity-60 md:hidden">👆 滑动屏幕移动方块</p>
+    </div>
+
+    <!-- 统计信息 -->
+    <div class="w-full mt-4 grid grid-cols-3 gap-3">
+      <div class="stat-card rounded-xl p-3 text-center">
+        <div class="text-xs font-semibold">移动次数</div>
+        <div id="move-count" class="text-2xl font-extrabold">0</div>
+      </div>
+      <div class="stat-card rounded-xl p-3 text-center">
+        <div class="text-xs font-semibold">最大方块</div>
+        <div id="max-tile" class="text-2xl font-extrabold">0</div>
+      </div>
+      <div class="stat-card rounded-xl p-3 text-center">
+        <div class="text-xs font-semibold">游戏时间</div>
+        <div id="game-time" class="text-2xl font-extrabold">0:00</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 游戏主逻辑 -->
+  <script type="module" src="./games/2048/main.js"></script>
+</body>
+</html>

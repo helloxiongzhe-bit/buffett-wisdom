@@ -2,9 +2,10 @@
   五子棋 - 移动版（侘寂风格 / Wabi-Sabi）
   
   针对移动端优化：
+    - 无全局导航栏，游戏全屏沉浸体验
     - 触摸操作（touchend 落子，无悬停预览）
     - 自适应棋盘尺寸（适配屏幕高度，包含 safe-area 支持）
-    - 简化 UI（去掉侧面板，仅保留 状态栏 + 棋盘 + 底部按钮）
+    - 简化 UI（去掉侧面板，仅保留 标题 + 状态栏 + 棋盘 + 底部按钮）
     - 默认困难 AI，自动开始
     - 覆盖全局 styles.css 冷色变量为侘寂暖色调
 -->
@@ -117,118 +118,21 @@
             color: var(--g-text);
         }
 
-        /* 覆盖全局样式 - 保持侘寂风格 */
+        /* 覆盖全局装饰元素 - 保持侘寂风格纯净 */
         .grid-bg { background-image: none !important; }
-        .radial-glow { display: none !important; }
-        .scroll-progress { display: none !important; }
-        /* 确保弹窗定位不受page-wrapper的will-change影响 */
+        .radial-glow, .scroll-progress, .cursor-glow { display: none !important; }
         .page-wrapper {
             will-change: auto !important;
             min-height: 100vh !important;
             min-height: 100dvh !important;
             background: var(--g-bg) !important;
         }
-        /* 导航栏在侘寂风下的适配 */
-        .top-bar {
-            backdrop-filter: blur(20px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-            border-bottom-color: var(--g-border) !important;
-        }
-        html:not([data-theme="dark"]) .top-bar {
-            background: rgba(245, 241, 235, 0.9) !important;
-        }
-        html[data-theme="dark"] .top-bar {
-            background: rgba(28, 26, 23, 0.9) !important;
-        }
-        .top-bar .hamburger-btn {
-            background: transparent !important;
-            border-color: var(--g-border-light) !important;
-        }
-        .top-bar .hamburger-line {
-            background: var(--g-text) !important;
-        }
-        .top-bar .top-bar-logo span {
-            color: var(--g-text) !important;
-        }
-        .top-bar .theme-toggle-btn {
-            background: transparent !important;
-            border-color: var(--g-border-light) !important;
-            color: var(--g-text-sub) !important;
-        }
-        /* 导航面板侘寂风格适配 */
-        .nav-panel-inner {
-            background: var(--g-surface) !important;
-            border-right-color: var(--g-border) !important;
-        }
-        .nav-panel-header {
-            border-bottom-color: var(--g-border) !important;
-        }
-        .nav-panel-close {
-            background: var(--g-surface-hover) !important;
-            border-color: var(--g-border-light) !important;
-            color: var(--g-text-sub) !important;
-        }
-        .nav-panel-link:hover {
-            background: var(--g-surface-hover) !important;
-        }
-        .nav-panel-link.active {
-            background: rgba(160, 144, 128, 0.12) !important;
-        }
-        .nav-panel-link.active .nav-panel-link-icon {
-            background: var(--g-btn-bg) !important;
-            border-color: transparent !important;
-            color: var(--g-btn-text) !important;
-        }
-        .nav-panel-link.active .nav-panel-link-title {
-            color: var(--g-text) !important;
-        }
-        .nav-panel-link-icon {
-            background: var(--g-surface) !important;
-            border-color: var(--g-border-light) !important;
-            color: var(--g-text-hint) !important;
-        }
-        .nav-panel-link:hover .nav-panel-link-icon {
-            background: rgba(160, 144, 128, 0.12) !important;
-            border-color: rgba(160, 144, 128, 0.2) !important;
-            color: var(--g-text) !important;
-        }
-        .nav-panel-link-title {
-            color: var(--g-text) !important;
-        }
-        .nav-panel-link-desc {
-            color: var(--g-text-hint) !important;
-        }
-        .nav-panel-link-arrow {
-            color: var(--g-text-hint) !important;
-        }
-        .nav-panel-footer {
-            border-top-color: var(--g-border) !important;
-        }
-        .nav-panel-theme-btn {
-            background: var(--g-surface) !important;
-            border-color: var(--g-border-light) !important;
-            color: var(--g-text-sub) !important;
-        }
-        .nav-panel-theme-btn:hover {
-            background: var(--g-surface-hover) !important;
-            border-color: var(--g-border) !important;
-            color: var(--g-text) !important;
-        }
-        /* 覆盖全局 radial-glow、scroll-progress、grid-bg 等装饰 */
-        .radial-glow, .scroll-progress, .cursor-glow { display: none !important; }
-        .grid-bg { background-image: none !important; }
-        /* 覆盖全局 page-transition-bar 的紫色渐变 */
-        .page-transition-bar {
-            background: linear-gradient(135deg, #A09080, #8B7D6B) !important;
-            box-shadow: 0 0 12px rgba(160, 144, 128, 0.4) !important;
-        }
 
         .game-container {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 64px);
-            height: calc(100dvh - 64px);
-            padding-top: 64px;
+            height: 100vh;
+            height: 100dvh;
         }
 
         /* 顶部 */
@@ -522,20 +426,16 @@
     </div> <!-- /game-container -->
 
     <script type="module">
-        import { createNav } from './components/nav.js';
         import { Game } from './games/gomoku/game.js';
         import { AI } from './games/gomoku/ai.js';
-
-        // === 创建全局导航 ===
-        createNav('games');
 
         // === 自适应棋盘尺寸 ===
         const BOARD_SIZE = 15;
         const screenW = window.innerWidth;
         const screenH = window.innerHeight;
 
-        // 全局导航(~64) + 顶部(~36) + 分隔线(1) + 状态栏(~38) + 底部控制(~60 + safe area) + padding(8)
-        const availH = screenH - 64 - 36 - 1 - 38 - 68 - 8;
+        // 顶部(~36) + 分隔线(1) + 状态栏(~38) + 底部控制(~60 + safe area) + padding(8)
+        const availH = screenH - 36 - 1 - 38 - 68 - 8;
         const availW = screenW - 24;
         const boardPixel = Math.min(availW, availH);
 

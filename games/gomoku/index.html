@@ -2,7 +2,8 @@
   五子棋 - 桌面版（侘寂风格 / Wabi-Sabi）
   
   设计特点：
-    - 侘寂美学配色（暖褐色调），覆盖全局 styles.css 冷色变量
+    - 无全局导航栏，游戏全屏沉浸体验（通过 iframe 嵌入 games.html）
+    - 侘寂美学配色（暖褐色调），独立配色方案
     - 三栏布局：左侧面板（玩家信息/模式选择）+ 中央棋盘 + 右侧面板（记录/统计）
     - 三层 Canvas 渲染：棋盘底图 / 棋子层 / 悬停预览层
     - 支持双人对战 & 人机对战（简单/中等/困难三种 AI 难度）
@@ -36,8 +37,6 @@
             document.documentElement.setAttribute('data-theme', theme);
         })();
     </script>
-    <link rel="stylesheet" href="./styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -87,60 +86,10 @@
             user-select: none;
         }
 
-        /* 覆盖全局样式 - 保持侘寂风格 */
-        .grid-bg {
-            background-image: none !important;
-        }
-        .radial-glow {
-            display: none !important;
-        }
-        .scroll-progress {
-            display: none !important;
-        }
-        /* 确保弹窗定位不受page-wrapper的will-change影响 */
-        .page-wrapper {
-            will-change: auto !important;
-            min-height: 100vh !important;
-            background: var(--g-bg) !important;
-        }
-        /* 导航栏在侘寂风下的适配 - 使用侘寂色彩但不阻止主题切换 */
-        .top-bar {
-            backdrop-filter: blur(20px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-            border-bottom-color: var(--g-border) !important;
-        }
-        html:not([data-theme="dark"]) .top-bar {
-            background: rgba(245, 241, 235, 0.9) !important;
-        }
-        html[data-theme="dark"] .top-bar {
-            background: rgba(28, 26, 23, 0.9) !important;
-        }
-        .top-bar .hamburger-btn {
-            background: transparent !important;
-            border-color: var(--g-border-light) !important;
-        }
-        .top-bar .hamburger-line {
-            background: var(--g-text) !important;
-        }
-        .top-bar .top-bar-logo span {
-            color: var(--g-text) !important;
-        }
-        .top-bar .theme-toggle-btn {
-            background: transparent !important;
-            border-color: var(--g-border-light) !important;
-            color: var(--g-text-sub) !important;
-        }
-        /* 导航面板侘寂风格适配 */
-        .nav-panel-inner {
-            background: var(--g-surface) !important;
-            border-right-color: var(--g-border) !important;
-        }
-
         .game-container {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 64px);
-            padding-top: 64px;
+            height: 100vh;
         }
 
         /* === 游戏顶部栏 === */
@@ -835,23 +784,18 @@
     </div> <!-- /game-container -->
 
     <script type="module">
-        import { createNav } from './components/nav.js';
         import { Game } from './games/gomoku/game.js';
         import { BoardRenderer } from './games/gomoku/renderer.js';
         import { AI } from './games/gomoku/ai.js';
 
-        // === 创建全局导航 ===
-        createNav('games');
-
         // === 自适应棋盘尺寸（适配一屏）===
         const BOARD_SIZE = 15;
-        const globalNavH = 64;  // 全局导航栏高度
         const topBarH = 52;
         const mainPad = 12;
         const sidePanelW = 200;
         const gapW = 24;
 
-        const availH = window.innerHeight - globalNavH - topBarH - mainPad * 2;
+        const availH = window.innerHeight - topBarH - mainPad * 2;
         const availW = window.innerWidth - sidePanelW * 2 - gapW * 2 - mainPad * 2;
         const boardPixel = Math.min(availH, availW);
 
