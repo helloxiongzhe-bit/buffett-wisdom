@@ -78,16 +78,6 @@
                 </div>
             </div>
 
-            <!-- 游戏区域（iframe 嵌入，五子棋/2048 共用） -->
-            <div id="game-area" style="display: none;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <h2 id="game-area-title" style="font-size: 20px; font-weight: 600; color: var(--text-primary);"><i class="ri-goblet-line" style="color: var(--accent-blue);"></i> 五子棋</h2>
-                    <button id="close-game" class="btn-ghost" style="font-size: 13px; padding: 6px 16px;">
-                        <i class="ri-close-line"></i> 关闭游戏
-                    </button>
-                </div>
-                <iframe id="game-iframe" src="" style="width: 100%; height: calc(100vh - 200px); border: none; border-radius: 12px;" title="游戏"></iframe>
-            </div>
         </section>
     </div>
 
@@ -111,30 +101,13 @@
 
         const gomokuCard = document.getElementById('gomoku-card');
         const game2048Card = document.getElementById('game2048-card');
-        const gameArea = document.getElementById('game-area');
-        const gameAreaTitle = document.getElementById('game-area-title');
-        const gameIframe = document.getElementById('game-iframe');
-        const closeGame = document.getElementById('close-game');
-
-        /** 打开指定游戏 */
-        function openGame(src, title, icon) {
-            gameIframe.src = src;
-            gameAreaTitle.innerHTML = `<i class="${icon}" style="color: var(--accent-blue);"></i> ${title}`;
-            gameArea.style.display = 'block';
-            gameArea.scrollIntoView({ behavior: 'smooth' });
-        }
 
         gomokuCard.addEventListener('click', () => {
-            openGame('games/gomoku/index.html', '五子棋', 'ri-goblet-line');
+            window.location.href = 'games/gomoku/index.html';
         });
 
         game2048Card.addEventListener('click', () => {
-            openGame('games/2048/index.html', '2048', 'ri-numbers-line');
-        });
-
-        closeGame.addEventListener('click', () => {
-            gameArea.style.display = 'none';
-            gameIframe.src = '';
+            window.location.href = 'games/2048/index.html';
         });
     </script>
 </body>

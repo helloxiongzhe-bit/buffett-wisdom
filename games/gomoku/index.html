@@ -2,7 +2,7 @@
   五子棋 - 桌面版（侘寂风格 / Wabi-Sabi）
   
   设计特点：
-    - 无全局导航栏，游戏全屏沉浸体验（通过 iframe 嵌入 games.html）
+    - 独立游戏页面，左上角浮动返回按钮
     - 侘寂美学配色（暖褐色调），独立配色方案
     - 三栏布局：左侧面板（玩家信息/模式选择）+ 中央棋盘 + 右侧面板（记录/统计）
     - 三层 Canvas 渲染：棋盘底图 / 棋子层 / 悬停预览层
@@ -603,9 +603,45 @@
         }
 
         .close-btn:hover { background: var(--g-border); }
+
+        /* === 返回按钮 === */
+        .back-btn {
+            position: fixed;
+            top: 10px;
+            left: 12px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border: 1px solid var(--g-border);
+            border-radius: 18px;
+            background: var(--g-surface);
+            color: var(--g-text-sub);
+            font-size: 13px;
+            font-family: 'LXGW WenKai', 'Noto Serif SC', serif;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background: var(--g-surface-hover);
+            border-color: var(--g-text-faint);
+            color: var(--g-text);
+        }
+        .back-btn svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
+    <!-- 返回 Play 页面 -->
+    <a href="games.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        Play
+    </a>
     <div class="game-container">
     <!-- 游戏顶部栏 -->
     <div class="game-top-bar">

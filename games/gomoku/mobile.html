@@ -2,7 +2,7 @@
   五子棋 - 移动版（侘寂风格 / Wabi-Sabi）
   
   针对移动端优化：
-    - 无全局导航栏，游戏全屏沉浸体验
+    - 独立游戏页面，左上角返回按钮
     - 触摸操作（touchend 落子，无悬停预览）
     - 自适应棋盘尺寸（适配屏幕高度，包含 safe-area 支持）
     - 简化 UI（去掉侧面板，仅保留 标题 + 状态栏 + 棋盘 + 底部按钮）
@@ -364,9 +364,44 @@
         }
 
         .modal-btn:active { transform: scale(0.97); }
+
+        /* === 返回按钮 === */
+        .back-btn {
+            position: fixed;
+            top: 8px;
+            left: 10px;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 12px;
+            border: 1px solid var(--g-border);
+            border-radius: 18px;
+            background: var(--g-surface);
+            color: var(--g-text-sub);
+            font-size: 12px;
+            font-family: 'LXGW WenKai', 'Noto Serif SC', serif;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+        .back-btn:active {
+            background: var(--g-surface-hover);
+            transform: scale(0.96);
+        }
+        .back-btn svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
+    <!-- 返回 Play 页面 -->
+    <a href="games.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        Play
+    </a>
     <div class="game-container">
     <!-- 顶部 -->
     <div class="header">

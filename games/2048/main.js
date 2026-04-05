@@ -156,15 +156,29 @@ function initGridBackground() {
 
 /**
  * 计算方块的像素位置
+ * 直接读取 grid cell 的实际 DOM 位置，确保方块与背景格子完全对齐。
  * @param {number} row
  * @param {number} col
  * @returns {{ left: number, top: number, cellSize: number }}
  */
 function getTilePosition(row, col) {
-  const boardRect = gridBackground.getBoundingClientRect();
-  const cellGap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-gap'));
-  const cellSize = (boardRect.width - cellGap * (SIZE - 1)) / SIZE;
+  const cells = gridBackground.querySelectorAll('.grid-cell');
+  const tileContainerRect = tileContainer.getBoundingClientRect();
+  const idx = row * SIZE + col;
+  const cell = cells[idx];
 
+  if (cell) {
+    const cellRect = cell.getBoundingClientRect();
+    return {
+      left: cellRect.left - tileContainerRect.left,
+      top: cellRect.top - tileContainerRect.top,
+      cellSize: cellRect.width
+    };
+  }
+
+  // fallback：手动计算
+  const cellGap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-gap'));
+  const cellSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'));
   return {
     left: col * (cellSize + cellGap),
     top: row * (cellSize + cellGap),
@@ -228,6 +242,8 @@ function renderGrid(newTile = null, mergeInfo = [], direction = null, wallHits =
       tile.className = tileClass;
       tile.style.left = `${pos.left}px`;
       tile.style.top = `${pos.top}px`;
+      tile.style.width = `${pos.cellSize}px`;
+      tile.style.height = `${pos.cellSize}px`;
       tile.textContent = value;
 
       tileContainer.appendChild(tile);

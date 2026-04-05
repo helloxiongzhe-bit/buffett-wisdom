@@ -48,7 +48,7 @@ body {
   overflow: hidden;
   touch-action: none;
   font-family: 'Nunito', 'Noto Sans SC', sans-serif;
-  background: linear-gradient(135deg, #0f0c29 0%, #1a1040 30%, #24243e 60%, #302b63 100%);
+  background: #000000;
   height: 100%;
   margin: 0;
   padding: 0;
@@ -57,26 +57,7 @@ body {
   -webkit-user-select: none;
 }
 
-/* 背景动态光效 */
-body::before {
-  content: '';
-  position: fixed;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(ellipse at 30% 20%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
-  animation: bgShift 15s ease-in-out infinite alternate;
-  z-index: 0;
-  pointer-events: none;
-}
-
-@keyframes bgShift {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  100% { transform: translate(3%, 3%) rotate(3deg); }
-}
+/* 背景动态光效（已移除，纯黑背景） */
 
 #game-container {
   position: relative;
