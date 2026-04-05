@@ -1,262 +1,1220 @@
+<!--
+  五子棋 - 桌面版（侘寂风格 / Wabi-Sabi）
+  
+  设计特点：
+    - 侘寂美学配色（暖褐色调），覆盖全局 styles.css 冷色变量
+    - 三栏布局：左侧面板（玩家信息/模式选择）+ 中央棋盘 + 右侧面板（记录/统计）
+    - 三层 Canvas 渲染：棋盘底图 / 棋子层 / 悬停预览层
+    - 支持双人对战 & 人机对战（简单/中等/困难三种 AI 难度）
+    - 包含计时系统、悔棋、胜利动画和规则弹窗
+    - 移动端自动重定向到 mobile.html
+-->
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head><script src="https://with.woa.com/d2c/assets/iframe.js?_t=1775325794394"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="../../">
     <title>五子棋 - 经典对弈</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // 移动端检测：触屏设备 + 屏幕宽度 ≤ 768px 时自动跳转移动版
+        (function() {
+            var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            var isSmallScreen = window.innerWidth <= 768;
+            if ((isMobile || isSmallScreen) && window.location.pathname.indexOf('mobile.html') === -1) {
+                window.location.replace('games/gomoku/mobile.html');
+            }
+        })();
+    </script>
+    <style id="critical-css">
+        html, body { background-color: #F5F1EB; }
+        html[data-theme="dark"], html[data-theme="dark"] body { background-color: #1C1A17; }
+    </style>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('buffett-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* 五子棋游戏色彩变量 - 侘寂风格 */
+        :root {
+            --g-bg: #F5F1EB;
+            --g-text: #3D3A35;
+            --g-text-sub: #6B665C;
+            --g-text-hint: #A09A90;
+            --g-text-muted: #8A8478;
+            --g-text-faint: #B8B2A6;
+            --g-border: #E0DBD0;
+            --g-border-light: #D4CFC6;
+            --g-surface: #FDFCFA;
+            --g-surface-hover: #EDE9E1;
+            --g-btn-bg: #3D3A35;
+            --g-btn-text: #F5F1EB;
+        }
+        [data-theme="dark"] {
+            --g-bg: #1C1A17;
+            --g-text: #E8E0D4;
+            --g-text-sub: #A09A8A;
+            --g-text-hint: #7A7468;
+            --g-text-muted: #6B665C;
+            --g-text-faint: #504B42;
+            --g-border: rgba(232, 224, 212, 0.12);
+            --g-border-light: rgba(232, 224, 212, 0.08);
+            --g-surface: rgba(245, 241, 235, 0.06);
+            --g-surface-hover: rgba(245, 241, 235, 0.1);
+            --g-btn-bg: #A09080;
+            --g-btn-text: #1C1A17;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'LXGW WenKai', 'Noto Serif SC', serif;
+            background: var(--g-bg);
+            color: var(--g-text);
+            user-select: none;
+        }
+
+        /* 覆盖全局样式 - 保持侘寂风格 */
+        .grid-bg {
+            background-image: none !important;
+        }
+        .radial-glow {
+            display: none !important;
+        }
+        .scroll-progress {
+            display: none !important;
+        }
+        /* 确保弹窗定位不受page-wrapper的will-change影响 */
+        .page-wrapper {
+            will-change: auto !important;
+            min-height: 100vh !important;
+            background: var(--g-bg) !important;
+        }
+        /* 导航栏在侘寂风下的适配 - 使用侘寂色彩但不阻止主题切换 */
+        .top-bar {
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            border-bottom-color: var(--g-border) !important;
+        }
+        html:not([data-theme="dark"]) .top-bar {
+            background: rgba(245, 241, 235, 0.9) !important;
+        }
+        html[data-theme="dark"] .top-bar {
+            background: rgba(28, 26, 23, 0.9) !important;
+        }
+        .top-bar .hamburger-btn {
+            background: transparent !important;
+            border-color: var(--g-border-light) !important;
+        }
+        .top-bar .hamburger-line {
+            background: var(--g-text) !important;
+        }
+        .top-bar .top-bar-logo span {
+            color: var(--g-text) !important;
+        }
+        .top-bar .theme-toggle-btn {
+            background: transparent !important;
+            border-color: var(--g-border-light) !important;
+            color: var(--g-text-sub) !important;
+        }
+        /* 导航面板侘寂风格适配 */
+        .nav-panel-inner {
+            background: var(--g-surface) !important;
+            border-right-color: var(--g-border) !important;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 64px);
+            padding-top: 64px;
+        }
+
+        /* === 游戏顶部栏 === */
+        .game-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 52px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--g-border);
+        }
+
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .top-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 4px;
+            color: var(--g-text);
+        }
+
+        .top-subtitle {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--g-text-hint);
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 状态指示 */
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 14px;
+            height: 32px;
+            border: 1px solid var(--g-border);
+            border-radius: 16px;
+            font-size: 13px;
+            color: var(--g-text-sub);
+            letter-spacing: 1px;
+            background: var(--g-surface);
+        }
+
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .status-dot.black { background: var(--g-text); }
+        .status-dot.white { background: var(--g-surface); border: 1.5px solid var(--g-text-faint); }
+        .status-dot.idle { background: var(--g-border-light); }
+
+        /* 顶部按钮 */
+        .top-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 14px;
+            height: 32px;
+            border: 1px solid var(--g-border-light);
+            border-radius: 6px;
+            background: transparent;
+            font-family: 'LXGW WenKai', 'Noto Serif SC', serif;
+            font-size: 13px;
+            color: var(--g-text-sub);
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .top-btn:hover {
+            background: var(--g-surface-hover);
+            border-color: var(--g-text-faint);
+            color: var(--g-text);
+        }
+
+        .top-btn:active {
+            transform: scale(0.97);
+        }
+
+        .top-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .top-btn:disabled:hover {
+            background: transparent;
+            border-color: var(--g-border-light);
+            color: var(--g-text-sub);
+        }
+
+        .top-btn-primary {
+            background: var(--g-btn-bg);
+            border-color: var(--g-btn-bg);
+            color: var(--g-btn-text);
+        }
+
+        .top-btn-primary:hover {
+            background: var(--g-btn-bg);
+            border-color: var(--g-btn-bg);
+            color: var(--g-btn-text);
+            filter: brightness(1.1);
+        }
+
+        .divider-v {
+            width: 1px;
+            height: 20px;
+            background: var(--g-border);
+            margin: 0 4px;
+        }
+
+        /* === 主内容区 === */
+        .main-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 12px;
+        }
+
+        .game-layout {
+            display: flex;
+            align-items: stretch;
+            gap: 24px;
+            max-height: 100%;
+        }
+
+        /* 棋盘 */
+        .board-wrap {
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(61, 58, 53, 0.08);
+            flex-shrink: 0;
+        }
+
+        .board-wrap canvas {
+            display: block;
+        }
+
+        .board-wrap canvas:not(:first-child) {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* 侧面板 */
+        .side-panel {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .panel-card {
+            background: var(--g-surface);
+            border: 1px solid var(--g-border);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .panel-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--g-text-muted);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        /* 玩家卡片 */
+        .player-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-stone {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .player-stone.black-stone {
+            background: radial-gradient(circle at 35% 35%, #4A4540, #2A2623);
+        }
+
+        .player-stone.white-stone {
+            background: radial-gradient(circle at 35% 35%, #FDFCFA, #E8E0D4);
+            border: 1px solid var(--g-border-light);
+        }
+
+        .player-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--g-text);
+        }
+
+        .player-sub {
+            font-size: 11px;
+            color: var(--g-text-hint);
+        }
+
+        .player-card {
+            transition: all 0.3s ease;
+            padding: 10px 12px;
+            border-radius: 8px;
+        }
+
+        .player-card.active {
+            background: var(--g-surface-hover);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            padding: 3px 0;
+        }
+
+        .stat-label {
+            color: var(--g-text-hint);
+        }
+
+        .stat-value {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 500;
+            color: var(--g-text);
+        }
+
+        /* 模式选择 */
+        .mode-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 6px 0;
+            border: 1px solid var(--g-border-light);
+            border-radius: 6px;
+            background: transparent;
+            font-family: 'LXGW WenKai', serif;
+            font-size: 12px;
+            color: var(--g-text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .mode-btn:hover { background: var(--g-surface-hover); }
+
+        .mode-btn.active {
+            background: var(--g-btn-bg);
+            color: var(--g-btn-text);
+            border-color: var(--g-btn-bg);
+        }
+
+        /* AI难度 */
+        .ai-levels {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .ai-level-btn {
+            flex: 1;
+            padding: 4px 0;
+            border: 1px solid var(--g-border-light);
+            border-radius: 4px;
+            background: transparent;
+            font-family: 'LXGW WenKai', serif;
+            font-size: 11px;
+            color: var(--g-text-hint);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .ai-level-btn:hover { background: var(--g-surface-hover); }
+
+        .ai-level-btn.active {
+            background: var(--g-btn-bg);
+            color: var(--g-btn-text);
+            border-color: var(--g-btn-bg);
+        }
+
+        /* 落子记录 */
+        .move-list {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .move-list::-webkit-scrollbar { width: 3px; }
+        .move-list::-webkit-scrollbar-track { background: transparent; }
+        .move-list::-webkit-scrollbar-thumb { background: var(--g-border-light); border-radius: 2px; }
+
+        .move-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .move-item:hover { background: var(--g-surface-hover); }
+
+        .move-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .move-dot.black { background: var(--g-text); }
+        .move-dot.white { background: var(--g-bg); border: 1px solid var(--g-border-light); }
+
+        .move-num { color: var(--g-text-faint); font-size: 11px; width: 24px; }
+        .move-text { color: var(--g-text-sub); }
+
+        .empty-text {
+            text-align: center;
+            color: var(--g-text-faint);
+            font-size: 12px;
+            padding: 16px 0;
+        }
+
+        /* 快捷键 */
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--g-text-hint);
+            padding: 2px 0;
+        }
+
+        .kbd {
+            padding: 1px 6px;
+            background: var(--g-surface-hover);
+            border: 1px solid var(--g-border-light);
+            border-radius: 3px;
+            font-size: 10px;
+            color: var(--g-text-sub);
+        }
+
+        /* === 弹窗 === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(245, 241, 235, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        html[data-theme="dark"] .modal-overlay {
+            background: rgba(28, 26, 23, 0.85);
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-overlay.hidden { display: none; }
+
+        .modal-box {
+            background: var(--g-surface);
+            border: 1px solid var(--g-border);
+            border-radius: 14px;
+            padding: 28px 24px 24px;
+            max-width: 340px;
+            width: calc(100% - 48px);
+            text-align: center;
+            transform: translateY(16px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.show .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-icon { font-size: 36px; margin-bottom: 10px; }
+
+        .modal-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--g-text);
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: var(--g-text-hint);
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .modal-info {
+            border-top: 1px solid var(--g-border);
+            border-bottom: 1px solid var(--g-border);
+            padding: 14px 0;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .modal-info-label { font-size: 10px; color: var(--g-text-faint); letter-spacing: 1px; margin-bottom: 4px; }
+        .modal-info-value { font-family: 'Noto Serif SC', serif; font-size: 16px; font-weight: 500; color: var(--g-text); }
+
+        .modal-actions { display: flex; gap: 8px; }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--g-border-light);
+            border-radius: 8px;
+            font-family: 'LXGW WenKai', serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--g-text-sub);
+        }
+
+        .modal-btn-primary {
+            background: var(--g-btn-bg);
+            border-color: var(--g-btn-bg);
+            color: var(--g-btn-text);
+        }
+
+        .modal-btn:active { transform: scale(0.97); }
+
+        /* 规则弹窗 */
+        .rules-content {
+            text-align: left;
+        }
+
+        .rule-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: var(--g-text-sub);
+            line-height: 1.6;
+        }
+
+        .rule-num {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--g-surface-hover);
+            color: var(--g-text-muted);
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .rules-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .rules-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--g-text);
+            letter-spacing: 2px;
+        }
+
+        .close-btn {
+            width: 28px; height: 28px;
+            border: none;
+            background: var(--g-surface-hover);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--g-text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover { background: var(--g-border); }
+    </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
-    <!-- 顶部导航 -->
-    <nav class="bg-gradient-to-r from-amber-800 to-amber-900 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center shadow-inner">
-                    <i class="ri-gamepad-line text-white text-xl"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-amber-100 tracking-wider">五子棋</h1>
-                <span class="text-amber-300 text-sm hidden sm:inline">经典对弈 · 智慧博弈</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <button id="btn-rules" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded-lg text-sm transition-all duration-300 flex items-center gap-1">
-                    <i class="ri-question-line"></i> 规则
-                </button>
-                <button id="btn-settings" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded-lg text-sm transition-all duration-300 flex items-center gap-1">
-                    <i class="ri-settings-3-line"></i> 设置
-                </button>
-            </div>
+<body>
+    <div class="game-container">
+    <!-- 游戏顶部栏 -->
+    <div class="game-top-bar">
+        <div class="top-left">
+            <span class="top-title">五子棋</span>
+            <span class="top-subtitle">经典对弈 · 智慧博弈</span>
         </div>
-    </nav>
+        <div class="top-right">
+            <div class="status-pill">
+                <div class="status-dot idle" id="status-dot"></div>
+                <span id="status-text">点击"开始"开始对局</span>
+            </div>
+            <div class="divider-v"></div>
+            <button class="top-btn top-btn-primary" id="btn-start">▶ 开始</button>
+            <button class="top-btn" id="btn-undo" disabled>↩ 悔棋</button>
+            <button class="top-btn" id="btn-restart">⟳ 重来</button>
+            <div class="divider-v"></div>
+            <button class="top-btn" id="btn-rules">? 规则</button>
+        </div>
+    </div>
 
-    <!-- 主内容区 -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
-        <div class="flex flex-col lg:flex-row gap-6 items-start justify-center">
-            <!-- 左侧面板 -->
-            <div class="w-full lg:w-64 flex flex-col gap-4 order-2 lg:order-1">
-                <div id="player-black" class="player-card bg-white rounded-2xl shadow-md p-4 border-2 border-transparent transition-all duration-300">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gray-900 shadow-lg flex items-center justify-center border-2 border-gray-600">
-                            <span class="text-white text-xs font-bold">黑</span>
+    <!-- 主内容 -->
+    <div class="main-area">
+        <div class="game-layout">
+            <!-- 左面板 -->
+            <div class="side-panel" id="left-panel">
+                <!-- 玩家信息 -->
+                <div class="panel-card">
+                    <div class="player-card active" id="player-black">
+                        <div class="player-row">
+                            <div class="player-stone black-stone"></div>
+                            <div>
+                                <div class="player-name">黑棋 · 先手</div>
+                                <div class="player-sub" id="black-status">等待开始</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="font-bold text-gray-800">黑棋 · 先手</div>
-                            <div class="text-xs text-gray-500" id="black-status">等待开始</div>
+                        <div class="stat-row" style="margin-top:8px;">
+                            <span class="stat-label">用时</span>
+                            <span class="stat-value" id="black-time">00:00</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">胜场</span>
+                            <span class="stat-value" id="black-wins" style="color:#C4745A;">0</span>
                         </div>
                     </div>
-                    <div class="mt-3 flex items-center justify-between text-sm">
-                        <span class="text-gray-500">用时</span>
-                        <span id="black-time" class="font-mono text-lg font-bold text-gray-800">00:00</span>
-                    </div>
-                    <div class="mt-2 flex items-center justify-between text-sm">
-                        <span class="text-gray-500">胜场</span>
-                        <span id="black-wins" class="font-bold text-amber-600">0</span>
+                    <div style="height:1px;background:linear-gradient(to right,transparent,var(--g-border),transparent);margin:10px 0;"></div>
+                    <div class="player-card" id="player-white">
+                        <div class="player-row">
+                            <div class="player-stone white-stone"></div>
+                            <div>
+                                <div class="player-name">白棋 · 后手</div>
+                                <div class="player-sub" id="white-status">等待开始</div>
+                            </div>
+                        </div>
+                        <div class="stat-row" style="margin-top:8px;">
+                            <span class="stat-label">用时</span>
+                            <span class="stat-value" id="white-time">00:00</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">胜场</span>
+                            <span class="stat-value" id="white-wins" style="color:#C4745A;">0</span>
+                        </div>
                     </div>
                 </div>
 
-                <div id="player-white" class="player-card bg-white rounded-2xl shadow-md p-4 border-2 border-transparent transition-all duration-300">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border-2 border-gray-300">
-                            <span class="text-gray-800 text-xs font-bold">白</span>
-                        </div>
-                        <div>
-                            <div class="font-bold text-gray-800">白棋 · 后手</div>
-                            <div class="text-xs text-gray-500" id="white-status">等待开始</div>
-                        </div>
+                <!-- 游戏模式 -->
+                <div class="panel-card">
+                    <div class="panel-title">游戏模式</div>
+                    <div class="mode-btns">
+                        <button class="mode-btn active" id="mode-pvp">双人对战</button>
+                        <button class="mode-btn" id="mode-pve">人机对战</button>
                     </div>
-                    <div class="mt-3 flex items-center justify-between text-sm">
-                        <span class="text-gray-500">用时</span>
-                        <span id="white-time" class="font-mono text-lg font-bold text-gray-800">00:00</span>
-                    </div>
-                    <div class="mt-2 flex items-center justify-between text-sm">
-                        <span class="text-gray-500">胜场</span>
-                        <span id="white-wins" class="font-bold text-amber-600">0</span>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-md p-4">
-                    <h3 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
-                        <i class="ri-gamepad-line text-amber-600"></i> 游戏模式
-                    </h3>
-                    <div class="flex flex-col gap-2">
-                        <button id="mode-pvp" class="mode-btn active px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2">
-                            <i class="ri-group-line"></i> 双人对战
-                        </button>
-                        <button id="mode-pve" class="mode-btn px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2">
-                            <i class="ri-robot-line"></i> 人机对战
-                        </button>
-                    </div>
-                    <div id="ai-difficulty" class="mt-3 hidden">
-                        <label class="text-xs text-gray-500 mb-1 block">AI难度</label>
-                        <div class="flex gap-2">
-                            <button data-level="easy" class="ai-level-btn active flex-1 px-2 py-1 rounded text-xs font-medium transition-all">简单</button>
-                            <button data-level="medium" class="ai-level-btn flex-1 px-2 py-1 rounded text-xs font-medium transition-all">中等</button>
-                            <button data-level="hard" class="ai-level-btn flex-1 px-2 py-1 rounded text-xs font-medium transition-all">困难</button>
-                        </div>
+                    <div id="ai-difficulty" class="ai-levels" style="display:none;">
+                        <button data-level="easy" class="ai-level-btn active">简单</button>
+                        <button data-level="medium" class="ai-level-btn">中等</button>
+                        <button data-level="hard" class="ai-level-btn">困难</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 中间棋盘区 -->
-            <div class="order-1 lg:order-2 flex flex-col items-center gap-4">
-                <div id="game-status" class="bg-white rounded-full shadow-md px-6 py-2 flex items-center gap-2 text-gray-700 font-medium">
-                    <div id="status-dot" class="w-4 h-4 rounded-full bg-gray-900 border border-gray-600"></div>
-                    <span id="status-text">黑棋先行，请落子</span>
-                </div>
-
-                <div id="board-container" class="board-container relative">
-                    <canvas id="board-canvas"></canvas>
-                    <canvas id="piece-canvas" class="absolute top-0 left-0"></canvas>
-                    <canvas id="hover-canvas" class="absolute top-0 left-0 cursor-pointer"></canvas>
-                </div>
-
-                <div class="flex gap-3 flex-wrap justify-center">
-                    <button id="btn-start" class="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center gap-2">
-                        <i class="ri-play-circle-line"></i> 开始游戏
-                    </button>
-                    <button id="btn-undo" class="px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center gap-2 border border-gray-200" disabled>
-                        <i class="ri-arrow-go-back-line"></i> 悔棋
-                    </button>
-                    <button id="btn-restart" class="px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center gap-2 border border-gray-200">
-                        <i class="ri-refresh-line"></i> 重新开始
-                    </button>
-                </div>
+            <!-- 棋盘 -->
+            <div class="board-wrap" id="board-container">
+                <canvas id="board-canvas"></canvas>
+                <canvas id="piece-canvas"></canvas>
+                <canvas id="hover-canvas" style="cursor:pointer;"></canvas>
             </div>
 
-            <!-- 右侧面板 -->
-            <div class="w-full lg:w-64 flex flex-col gap-4 order-3">
-                <div class="bg-white rounded-2xl shadow-md p-4">
-                    <h3 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
-                        <i class="ri-file-list-3-line text-amber-600"></i> 落子记录
-                    </h3>
-                    <div id="move-history" class="max-h-60 overflow-y-auto text-sm space-y-1 custom-scrollbar">
-                        <div class="text-gray-400 text-center py-4">暂无记录</div>
+            <!-- 右面板 -->
+            <div class="side-panel" id="right-panel">
+                <!-- 落子记录 -->
+                <div class="panel-card" style="flex:1;display:flex;flex-direction:column;">
+                    <div class="panel-title">落子记录</div>
+                    <div class="move-list" id="move-history" style="flex:1;">
+                        <div class="empty-text">暂无记录</div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-md p-4">
-                    <h3 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
-                        <i class="ri-bar-chart-2-line text-amber-600"></i> 对局统计
-                    </h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-500">总局数</span>
-                            <span id="stat-total" class="font-bold text-gray-800">0</span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-500">黑棋胜率</span>
-                            <span id="stat-black-rate" class="font-bold text-gray-800">0%</span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-500">白棋胜率</span>
-                            <span id="stat-white-rate" class="font-bold text-gray-800">0%</span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-500">平均步数</span>
-                            <span id="stat-avg-moves" class="font-bold text-gray-800">0</span>
-                        </div>
-                        <div class="mt-2">
-                            <div class="h-3 bg-gray-200 rounded-full overflow-hidden flex">
-                                <div id="bar-black" class="bg-gray-800 transition-all duration-500" style="width: 50%"></div>
-                                <div id="bar-white" class="bg-amber-400 transition-all duration-500" style="width: 50%"></div>
-                            </div>
-                            <div class="flex justify-between text-xs text-gray-400 mt-1">
-                                <span>黑棋</span>
-                                <span>白棋</span>
-                            </div>
-                        </div>
+                <!-- 对局统计 -->
+                <div class="panel-card">
+                    <div class="panel-title">对局统计</div>
+                    <div class="stat-row">
+                        <span class="stat-label">总局数</span>
+                        <span class="stat-value" id="stat-total">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">黑棋胜率</span>
+                        <span class="stat-value" id="stat-black-rate">0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">白棋胜率</span>
+                        <span class="stat-value" id="stat-white-rate">0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">平均步数</span>
+                        <span class="stat-value" id="stat-avg-moves">0</span>
+                    </div>
+                    <div style="margin-top:6px;height:4px;background:var(--g-surface-hover);border-radius:2px;overflow:hidden;display:flex;">
+                        <div id="bar-black" style="background:var(--g-text);width:50%;transition:width 0.5s;"></div>
+                        <div id="bar-white" style="background:var(--g-border-light);width:50%;transition:width 0.5s;"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--g-text-faint);margin-top:3px;">
+                        <span>黑棋</span><span>白棋</span>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-md p-4">
-                    <h3 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
-                        <i class="ri-keyboard-line text-amber-600"></i> 快捷键
-                    </h3>
-                    <div class="space-y-2 text-sm text-gray-500">
-                        <div class="flex justify-between">
-                            <span>开始/暂停</span>
-                            <kbd class="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">Space</kbd>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>悔棋</span>
-                            <kbd class="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">Ctrl+Z</kbd>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>重新开始</span>
-                            <kbd class="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">Ctrl+R</kbd>
-                        </div>
-                    </div>
+                <!-- 快捷键 -->
+                <div class="panel-card">
+                    <div class="panel-title">快捷键</div>
+                    <div class="shortcut-row"><span>开始/暂停</span><span class="kbd">Space</span></div>
+                    <div class="shortcut-row"><span>悔棋</span><span class="kbd">Ctrl+Z</span></div>
+                    <div class="shortcut-row"><span>重新开始</span><span class="kbd">Ctrl+R</span></div>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     <!-- 规则弹窗 -->
     <div id="modal-rules" class="modal-overlay hidden">
-        <div class="modal-content bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4 transform transition-all">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <i class="ri-book-open-line text-amber-600"></i> 游戏规则
-                </h2>
-                <button class="modal-close w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
-                    <i class="ri-close-line text-gray-500 text-xl"></i>
-                </button>
+        <div class="modal-box" style="max-width:420px;text-align:left;">
+            <div class="rules-header">
+                <span class="rules-title">游戏规则</span>
+                <button class="close-btn modal-close">✕</button>
             </div>
-            <div class="space-y-3 text-gray-600 text-sm leading-relaxed">
-                <div class="flex gap-3 items-start">
-                    <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
-                    <p>五子棋是一种两人对弈的棋类游戏，使用15×15的棋盘。</p>
-                </div>
-                <div class="flex gap-3 items-start">
-                    <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
-                    <p>黑棋先行，双方轮流在棋盘交叉点上落子。</p>
-                </div>
-                <div class="flex gap-3 items-start">
-                    <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
-                    <p>先在横、竖或斜方向上形成连续五个同色棋子的一方获胜。</p>
-                </div>
-                <div class="flex gap-3 items-start">
-                    <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">4</span>
-                    <p>棋盘下满未分出胜负则为平局。</p>
-                </div>
-                <div class="flex gap-3 items-start">
-                    <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">5</span>
-                    <p>支持悔棋功能，可撤销上一步操作。人机模式下悔棋将同时撤销AI的落子。</p>
-                </div>
+            <div class="rules-content">
+                <div class="rule-item"><span class="rule-num">1</span><p>五子棋使用15×15的棋盘，双方轮流在交叉点上落子。</p></div>
+                <div class="rule-item"><span class="rule-num">2</span><p>黑棋先行，先在横、竖或斜方向形成连续五子的一方获胜。</p></div>
+                <div class="rule-item"><span class="rule-num">3</span><p>棋盘下满未分出胜负则为平局。</p></div>
+                <div class="rule-item"><span class="rule-num">4</span><p>支持悔棋功能，人机模式下悔棋会同时撤销AI的落子。</p></div>
             </div>
         </div>
     </div>
 
     <!-- 胜利弹窗 -->
     <div id="modal-win" class="modal-overlay hidden">
-        <div class="modal-content bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center transform transition-all">
-            <div class="win-animation mb-4">
-                <div class="text-6xl mb-2">🎉</div>
-                <h2 id="win-title" class="text-2xl font-bold text-gray-800">黑棋获胜！</h2>
-                <p id="win-subtitle" class="text-gray-500 mt-2">精彩的对局！</p>
-            </div>
-            <div id="win-stats" class="bg-gray-50 rounded-xl p-4 mb-6 text-sm">
-                <div class="flex justify-between mb-2">
-                    <span class="text-gray-500">总步数</span>
-                    <span id="win-moves" class="font-bold text-gray-800">0</span>
+        <div class="modal-box">
+            <div class="modal-icon" id="win-icon">◉</div>
+            <div class="modal-title" id="win-title">黑棋获胜</div>
+            <div class="modal-subtitle" id="win-subtitle">精彩的对局</div>
+            <div class="modal-info">
+                <div>
+                    <div class="modal-info-label">总步数</div>
+                    <div class="modal-info-value" id="win-moves">0</div>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-500">用时</span>
-                    <span id="win-time" class="font-bold text-gray-800">00:00</span>
+                <div>
+                    <div class="modal-info-label">用时</div>
+                    <div class="modal-info-value" id="win-time">00:00</div>
                 </div>
             </div>
-            <div class="flex gap-3 justify-center">
-                <button id="btn-play-again" class="px-6 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-xl shadow-md font-medium transition-all duration-300">
-                    再来一局
-                </button>
-                <button class="modal-close px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-300">
-                    关闭
-                </button>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="btn-play-again">再来一局</button>
+                <button class="modal-btn modal-close">关闭</button>
             </div>
         </div>
     </div>
 
-    <script type="module" src="main.js"></script>
+    </div> <!-- /game-container -->
+
+    <script type="module">
+        import { createNav } from './components/nav.js';
+        import { Game } from './games/gomoku/game.js';
+        import { BoardRenderer } from './games/gomoku/renderer.js';
+        import { AI } from './games/gomoku/ai.js';
+
+        // === 创建全局导航 ===
+        createNav('games');
+
+        // === 自适应棋盘尺寸（适配一屏）===
+        const BOARD_SIZE = 15;
+        const globalNavH = 64;  // 全局导航栏高度
+        const topBarH = 52;
+        const mainPad = 12;
+        const sidePanelW = 200;
+        const gapW = 24;
+
+        const availH = window.innerHeight - globalNavH - topBarH - mainPad * 2;
+        const availW = window.innerWidth - sidePanelW * 2 - gapW * 2 - mainPad * 2;
+        const boardPixel = Math.min(availH, availW);
+
+        const PADDING = Math.max(20, Math.round(boardPixel * 0.04));
+        const CELL_SIZE = Math.floor((boardPixel - PADDING * 2) / (BOARD_SIZE - 1));
+        const canvasSize = CELL_SIZE * (BOARD_SIZE - 1) + PADDING * 2;
+        const PIECE_RADIUS = Math.floor(CELL_SIZE * 0.42);
+
+        const CONFIG = { boardSize: BOARD_SIZE, cellSize: CELL_SIZE, padding: PADDING, pieceRadius: PIECE_RADIUS };
+
+        // === 初始化 Canvas ===
+        const boardCanvas = document.getElementById('board-canvas');
+        const pieceCanvas = document.getElementById('piece-canvas');
+        const hoverCanvas = document.getElementById('hover-canvas');
+
+        [boardCanvas, pieceCanvas, hoverCanvas].forEach(c => {
+            const dpr = window.devicePixelRatio || 1;
+            c.width = canvasSize * dpr;
+            c.height = canvasSize * dpr;
+            c.style.width = canvasSize + 'px';
+            c.style.height = canvasSize + 'px';
+            c.getContext('2d').scale(dpr, dpr);
+        });
+
+        // === 侧面板高度与棋盘同步 ===
+        document.getElementById('left-panel').style.maxHeight = canvasSize + 'px';
+        document.getElementById('right-panel').style.maxHeight = canvasSize + 'px';
+
+        const renderer = new BoardRenderer(boardCanvas, pieceCanvas, hoverCanvas, CONFIG);
+        const game = new Game(CONFIG.boardSize);
+        const ai = new AI(CONFIG.boardSize);
+
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+        const moveHistoryEl = document.getElementById('move-history');
+        const btnStart = document.getElementById('btn-start');
+        const btnUndo = document.getElementById('btn-undo');
+        const btnRestart = document.getElementById('btn-restart');
+        const btnRules = document.getElementById('btn-rules');
+        const modePvp = document.getElementById('mode-pvp');
+        const modePve = document.getElementById('mode-pve');
+        const aiDifficulty = document.getElementById('ai-difficulty');
+        const playerBlack = document.getElementById('player-black');
+        const playerWhite = document.getElementById('player-white');
+
+        let gameState = {
+            started: false,
+            mode: 'pvp',
+            aiLevel: 'easy',
+            aiThinking: false,
+            blackTime: 0,
+            whiteTime: 0,
+            timerInterval: null,
+            stats: { total: 0, blackWins: 0, whiteWins: 0, totalMoves: 0 },
+        };
+
+        renderer.drawBoard();
+
+        function updateStatus() {
+            if (!gameState.started) {
+                statusText.textContent = '点击"开始"开始对局';
+                statusDot.className = 'status-dot idle';
+                playerBlack.classList.remove('active');
+                playerWhite.classList.remove('active');
+                document.getElementById('black-status').textContent = '等待开始';
+                document.getElementById('white-status').textContent = '等待开始';
+                return;
+            }
+            if (game.currentPlayer === 1) {
+                statusText.textContent = '黑棋思考中…';
+                statusDot.className = 'status-dot black';
+                playerBlack.classList.add('active');
+                playerWhite.classList.remove('active');
+                document.getElementById('black-status').textContent = '思考中…';
+                document.getElementById('white-status').textContent = '等待中';
+            } else {
+                statusText.textContent = gameState.mode === 'pve' ? 'AI思考中…' : '白棋思考中…';
+                statusDot.className = 'status-dot white';
+                playerWhite.classList.add('active');
+                playerBlack.classList.remove('active');
+                document.getElementById('white-status').textContent = gameState.mode === 'pve' ? 'AI思考中…' : '思考中…';
+                document.getElementById('black-status').textContent = '等待中';
+            }
+        }
+
+        function updateMoveHistory() {
+            const moves = game.moveHistory;
+            if (moves.length === 0) {
+                moveHistoryEl.innerHTML = '<div class="empty-text">暂无记录</div>';
+                return;
+            }
+            const colLabels = 'ABCDEFGHIJKLMNO';
+            moveHistoryEl.innerHTML = moves.map((m, i) => {
+                const color = m.player === 1 ? 'black' : 'white';
+                const label = m.player === 1 ? '黑' : '白';
+                const pos = `${colLabels[m.col]}${CONFIG.boardSize - m.row}`;
+                return `<div class="move-item">
+                    <span class="move-num">#${i + 1}</span>
+                    <span class="move-dot ${color}"></span>
+                    <span class="move-text">${label}棋 ${pos}</span>
+                </div>`;
+            }).join('');
+            moveHistoryEl.scrollTop = moveHistoryEl.scrollHeight;
+        }
+
+        function formatTime(s) {
+            return Math.floor(s / 60).toString().padStart(2, '0') + ':' + (s % 60).toString().padStart(2, '0');
+        }
+
+        function startTimer() {
+            stopTimer();
+            gameState.timerInterval = setInterval(() => {
+                if (game.currentPlayer === 1) {
+                    gameState.blackTime++;
+                    document.getElementById('black-time').textContent = formatTime(gameState.blackTime);
+                } else {
+                    gameState.whiteTime++;
+                    document.getElementById('white-time').textContent = formatTime(gameState.whiteTime);
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+        }
+
+        function updateStats() {
+            const s = gameState.stats;
+            document.getElementById('stat-total').textContent = s.total;
+            document.getElementById('black-wins').textContent = s.blackWins;
+            document.getElementById('white-wins').textContent = s.whiteWins;
+            const br = s.total > 0 ? Math.round(s.blackWins / s.total * 100) : 0;
+            const wr = s.total > 0 ? Math.round(s.whiteWins / s.total * 100) : 0;
+            document.getElementById('stat-black-rate').textContent = br + '%';
+            document.getElementById('stat-white-rate').textContent = wr + '%';
+            document.getElementById('stat-avg-moves').textContent = s.total > 0 ? Math.round(s.totalMoves / s.total) : 0;
+            document.getElementById('bar-black').style.width = (s.total > 0 ? br : 50) + '%';
+            document.getElementById('bar-white').style.width = (s.total > 0 ? wr : 50) + '%';
+        }
+
+        function handleMove(row, col) {
+            if (!gameState.started || game.isGameOver || gameState.aiThinking) return;
+            if (gameState.mode === 'pve' && game.currentPlayer === 2) return;
+
+            const result = game.makeMove(row, col);
+            if (!result) return;
+
+            renderer.drawPiece(row, col, result.player, true);
+            if (game.moveHistory.length > 1) {
+                const prev = game.moveHistory[game.moveHistory.length - 2];
+                renderer.drawPiece(prev.row, prev.col, prev.player, false);
+            }
+            updateMoveHistory();
+            btnUndo.disabled = false;
+
+            if (result.winner !== null) {
+                handleGameEnd(result.winner, result.winLine);
+                return;
+            }
+
+            updateStatus();
+
+            if (gameState.mode === 'pve' && game.currentPlayer === 2 && !game.isGameOver) {
+                gameState.aiThinking = true;
+                updateStatus();
+                setTimeout(() => {
+                    const aiMove = ai.getMove(game.board, gameState.aiLevel);
+                    if (aiMove) {
+                        const aiResult = game.makeMove(aiMove.row, aiMove.col);
+                        if (aiResult) {
+                            renderer.drawPiece(aiMove.row, aiMove.col, aiResult.player, true);
+                            const prev2 = game.moveHistory[game.moveHistory.length - 2];
+                            renderer.drawPiece(prev2.row, prev2.col, prev2.player, false);
+                            updateMoveHistory();
+                            if (aiResult.winner !== null) {
+                                handleGameEnd(aiResult.winner, aiResult.winLine);
+                            }
+                        }
+                    }
+                    gameState.aiThinking = false;
+                    updateStatus();
+                }, 300 + Math.random() * 400);
+            }
+        }
+
+        function handleGameEnd(winner, winLine) {
+            stopTimer();
+            gameState.started = false;
+            gameState.stats.total++;
+            gameState.stats.totalMoves += game.moveHistory.length;
+
+            if (winner === 1) {
+                gameState.stats.blackWins++;
+                statusText.textContent = '🎉 黑棋获胜！';
+            } else if (winner === 2) {
+                gameState.stats.whiteWins++;
+                statusText.textContent = '🎉 白棋获胜！';
+            } else {
+                statusText.textContent = '☯ 平局！';
+            }
+
+            if (winLine) renderer.drawWinLine(winLine);
+            updateStats();
+            btnUndo.disabled = true;
+            btnStart.textContent = '▶ 开始';
+            setTimeout(() => showWinModal(winner), 600);
+        }
+
+        function showWinModal(winner) {
+            const modal = document.getElementById('modal-win');
+            if (winner === 0) {
+                document.getElementById('win-icon').textContent = '☯';
+                document.getElementById('win-title').textContent = '平局';
+                document.getElementById('win-subtitle').textContent = '棋逢对手，势均力敌';
+            } else {
+                const name = winner === 1 ? '黑棋' : '白棋';
+                document.getElementById('win-icon').textContent = winner === 1 ? '◉' : '○';
+                document.getElementById('win-title').textContent = `${name}获胜`;
+                document.getElementById('win-subtitle').textContent = winner === 1 ? '先手优势，势如破竹' : '后发制人，精妙绝伦';
+            }
+            document.getElementById('win-moves').textContent = game.moveHistory.length;
+            document.getElementById('win-time').textContent = formatTime(gameState.blackTime + gameState.whiteTime);
+
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => modal.classList.add('show'));
+        }
+
+        function closeModal(modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function resetGame() {
+            stopTimer();
+            game.reset();
+            gameState.started = false;
+            gameState.blackTime = 0;
+            gameState.whiteTime = 0;
+            gameState.aiThinking = false;
+            renderer.clearPieces();
+            renderer.clearHover();
+            updateStatus();
+            updateMoveHistory();
+            document.getElementById('black-time').textContent = '00:00';
+            document.getElementById('white-time').textContent = '00:00';
+            btnUndo.disabled = true;
+            btnStart.textContent = '▶ 开始';
+        }
+
+        function getBoardPos(e) {
+            const rect = hoverCanvas.getBoundingClientRect();
+            const scaleX = canvasSize / rect.width;
+            const scaleY = canvasSize / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            const col = Math.round((x - CONFIG.padding) / CONFIG.cellSize);
+            const row = Math.round((y - CONFIG.padding) / CONFIG.cellSize);
+            if (row >= 0 && row < CONFIG.boardSize && col >= 0 && col < CONFIG.boardSize) {
+                return { row, col };
+            }
+            return null;
+        }
+
+        // === 事件绑定 ===
+        hoverCanvas.addEventListener('mousemove', (e) => {
+            if (!gameState.started || game.isGameOver || gameState.aiThinking) { renderer.clearHover(); return; }
+            if (gameState.mode === 'pve' && game.currentPlayer === 2) { renderer.clearHover(); return; }
+            const pos = getBoardPos(e);
+            if (pos && game.board[pos.row][pos.col] === 0) {
+                renderer.drawHover(pos.row, pos.col, game.currentPlayer);
+            } else {
+                renderer.clearHover();
+            }
+        });
+
+        hoverCanvas.addEventListener('mouseleave', () => renderer.clearHover());
+
+        hoverCanvas.addEventListener('click', (e) => {
+            const pos = getBoardPos(e);
+            if (pos) handleMove(pos.row, pos.col);
+        });
+
+        btnStart.addEventListener('click', () => {
+            if (gameState.started) return;
+            resetGame();
+            gameState.started = true;
+            updateStatus();
+            startTimer();
+            btnStart.textContent = '● 游戏中';
+        });
+
+        btnUndo.addEventListener('click', () => {
+            if (!gameState.started || game.isGameOver || gameState.aiThinking) return;
+            if (gameState.mode === 'pve') { game.undoMove(); game.undoMove(); }
+            else { game.undoMove(); }
+            renderer.redrawAllPieces(game.board, game.moveHistory);
+            updateMoveHistory();
+            updateStatus();
+            if (game.moveHistory.length === 0) btnUndo.disabled = true;
+        });
+
+        btnRestart.addEventListener('click', resetGame);
+
+        modePvp.addEventListener('click', () => {
+            gameState.mode = 'pvp';
+            modePvp.classList.add('active');
+            modePve.classList.remove('active');
+            aiDifficulty.style.display = 'none';
+            resetGame();
+        });
+
+        modePve.addEventListener('click', () => {
+            gameState.mode = 'pve';
+            modePve.classList.add('active');
+            modePvp.classList.remove('active');
+            aiDifficulty.style.display = 'flex';
+            resetGame();
+        });
+
+        document.querySelectorAll('.ai-level-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.ai-level-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                gameState.aiLevel = btn.dataset.level;
+            });
+        });
+
+        btnRules.addEventListener('click', () => {
+            const modal = document.getElementById('modal-rules');
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => modal.classList.add('show'));
+        });
+
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', () => closeModal(btn.closest('.modal-overlay')));
+        });
+
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
+        });
+
+        document.getElementById('btn-play-again').addEventListener('click', () => {
+            closeModal(document.getElementById('modal-win'));
+            setTimeout(() => {
+                resetGame();
+                gameState.started = true;
+                updateStatus();
+                startTimer();
+                btnStart.textContent = '● 游戏中';
+            }, 300);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') { e.preventDefault(); if (!gameState.started) btnStart.click(); }
+            if (e.ctrlKey && e.key === 'z') { e.preventDefault(); btnUndo.click(); }
+            if (e.ctrlKey && e.key === 'r') { e.preventDefault(); btnRestart.click(); }
+        });
+
+        updateStatus();
+        updateStats();
+    </script>
 </body>
 </html>

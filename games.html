@@ -1,9 +1,10 @@
+<!-- 游戏中心页面：展示所有可用的小游戏，目前包含五子棋 -->
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="dark">
 <head><script src="https://with.woa.com/d2c/assets/iframe.js?_t=1775325793933"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>休闲游戏 — Buffett Wisdom</title>
+    <title>Play — Buffett Wisdom</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
     <style id="critical-css">
         html, body { background-color: #0a0a0f; }
@@ -24,7 +25,7 @@
         <section style="max-width: 1280px; margin: 0 auto; padding: 0 24px 80px;">
             <div style="margin-bottom: 48px;">
                 <h1 style="font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; color: var(--text-primary); margin-bottom: 12px;">
-                    <i class="ri-gamepad-line" style="color: var(--accent-blue);"></i> 休闲游戏
+                    <i class="ri-gamepad-line" style="color: var(--accent-blue);"></i> Play
                 </h1>
                 <p style="color: var(--text-secondary); font-size: 15px; max-width: 600px;">
                     在学习投资知识之余放松身心，享受智力博弈的乐趣。
@@ -100,7 +101,7 @@
         if (_isEn) {
             document.title = 'Games — Buffett Wisdom';
             const h1 = document.querySelector('h1');
-            if (h1) h1.innerHTML = '<i class="ri-gamepad-line" style="color: var(--accent-blue);"></i> Casual Games';
+            if (h1) h1.innerHTML = '<i class="ri-gamepad-line" style="color: var(--accent-blue);"></i> Play';
             const desc = h1 ? h1.parentElement.querySelector('p') : null;
             if (desc) desc.textContent = 'Take a break from studying investment knowledge and enjoy the fun of intellectual games.';
         }

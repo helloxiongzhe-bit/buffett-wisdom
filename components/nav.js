@@ -1,4 +1,14 @@
-// 巴菲特知识库 - 全局导航组件（推移式全屏导航）
+/**
+ * 巴菲特知识库 - 全局导航组件
+ *
+ * 功能模块：
+ *   1. 多语言支持（中/英切换，优先级：URL参数 > localStorage > 默认中文）
+ *   2. 推移式全屏侧边导航（左侧滑出，主内容右推+模糊）
+ *   3. 页面跳转过渡动画（进度条 + 预加载 + 淡入淡出）
+ *   4. 主题切换（亮色/暗色模式持久化）
+ *   5. 全局交互动画（鼠标光晕、卡片3D倾斜、涟漪点击等）
+ *   6. 滚动揭示动画 & 页脚生成
+ */
 
 // === 全局语言偏好管理 ===
 // 优先级：URL参数 > localStorage > 默认中文
@@ -239,7 +249,14 @@ export function createNav(activePage = '') {
             <div class="nav-panel-header">
                 <a href="index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
                     <div style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--accent-gradient); flex-shrink: 0;">
-                        <span style="font-size:18px; color: #fff;"><i class="ri-bar-chart-box-line"></i></span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 19V5C4 4 5 3 6 3H18C19 3 20 4 20 5V19C20 20 19 21 18 21H6C5 21 4 20 4 19Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
+                            <path d="M12 3V21" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+                            <path d="M6 16C8 14 10 11 12 10C14 9 16.5 8.5 18 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M15.5 6.5L18 7L17.5 9.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="8" cy="14.5" r="1" fill="#fff" opacity="0.6"/>
+                            <circle cx="12" cy="10" r="1" fill="#fff"/>
+                        </svg>
                     </div>
                     <span style="font-family: var(--font-serif); font-weight: 600; font-size: 20px; color: var(--text-primary); letter-spacing: -0.01em;">Buffett Wisdom</span>
                 </a>
@@ -291,7 +308,7 @@ export function createNav(activePage = '') {
                 <a href="games.html" class="nav-panel-link ${activePage === 'games' ? 'active' : ''}" data-index="5">
                     <div class="nav-panel-link-icon"><i class="ri-gamepad-line"></i></div>
                     <div class="nav-panel-link-text">
-                        <span class="nav-panel-link-title">${_isEn ? 'Games' : '下个棋'}</span>
+                        <span class="nav-panel-link-title">${_isEn ? 'Games' : 'Play'}</span>
                         <span class="nav-panel-link-desc">${_isEn ? 'Relax, Focus, Flow' : '放松，专注，自然'}</span>
                     </div>
                     <i class="ri-arrow-right-s-line nav-panel-link-arrow"></i>
@@ -318,7 +335,14 @@ export function createNav(activePage = '') {
             </button>
             <a href="index.html" class="top-bar-logo" style="text-decoration: none;">
                 <div style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--accent-gradient); flex-shrink: 0;">
-                    <span style="font-size:14px; color: #fff;"><i class="ri-bar-chart-box-line"></i></span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 19V5C4 4 5 3 6 3H18C19 3 20 4 20 5V19C20 20 19 21 18 21H6C5 21 4 20 4 19Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
+                        <path d="M12 3V21" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+                        <path d="M6 16C8 14 10 11 12 10C14 9 16.5 8.5 18 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15.5 6.5L18 7L17.5 9.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="8" cy="14.5" r="1" fill="#fff" opacity="0.6"/>
+                        <circle cx="12" cy="10" r="1" fill="#fff"/>
+                    </svg>
                 </div>
                 <span style="font-family: var(--font-serif); font-weight: 600; font-size: 16px; color: var(--text-primary); letter-spacing: -0.01em;">Buffett Wisdom</span>
             </a>
@@ -684,7 +708,7 @@ export function createFooter() {
                 <a href="meetings.html" class="nav-link"><i class="ri-mic-line"></i> ${_isEn ? 'Meetings' : '股东大会'}</a>
                 <a href="glossary.html" class="nav-link"><i class="ri-book-2-line"></i> ${_isEn ? 'Glossary' : '名词解释'}</a>
                 <a href="people.html" class="nav-link"><i class="ri-user-star-line"></i> ${_isEn ? 'People' : '人物简介'}</a>
-                <a href="games.html" class="nav-link"><i class="ri-gamepad-line"></i> ${_isEn ? 'Games' : '休闲游戏'}</a>
+                <a href="games.html" class="nav-link"><i class="ri-gamepad-line"></i> ${_isEn ? 'Games' : 'Play'}</a>
             </div>
             <p style="color: var(--text-tertiary); font-size: 13px; line-height: 1.6;">
                 ${_isEn ? 'Content is for educational purposes only and does not constitute investment advice.<br>Original shareholder letters are copyrighted by Berkshire Hathaway Inc.' : '本站内容仅供学习研究使用，不构成投资建议。<br>股东信原文版权归 Berkshire Hathaway Inc. 所有。'}

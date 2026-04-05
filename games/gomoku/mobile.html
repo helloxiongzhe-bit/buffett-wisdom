@@ -1,0 +1,909 @@
+<!--
+  五子棋 - 移动版（侘寂风格 / Wabi-Sabi）
+  
+  针对移动端优化：
+    - 触摸操作（touchend 落子，无悬停预览）
+    - 自适应棋盘尺寸（适配屏幕高度，包含 safe-area 支持）
+    - 简化 UI（去掉侧面板，仅保留 状态栏 + 棋盘 + 底部按钮）
+    - 默认困难 AI，自动开始
+    - 覆盖全局 styles.css 冷色变量为侘寂暖色调
+-->
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <base href="../../">
+    <title>五子棋</title>
+    <style id="critical-css">
+        html, body { background-color: #F5F1EB; }
+        html[data-theme="dark"], html[data-theme="dark"] body { background-color: #1C1A17; }
+    </style>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('buffett-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        /* 五子棋游戏色彩变量 - 侘寂风格 */
+        :root {
+            --g-bg: #F5F1EB;
+            --g-text: #3D3A35;
+            --g-text-sub: #6B665C;
+            --g-text-hint: #A09A90;
+            --g-text-muted: #8A8478;
+            --g-text-faint: #B8B2A6;
+            --g-border: #E0DBD0;
+            --g-border-light: #D4CFC6;
+            --g-surface: #FDFCFA;
+            --g-surface-hover: #EDE9E1;
+            --g-btn-bg: #3D3A35;
+            --g-btn-text: #F5F1EB;
+
+            /* 覆盖全局 styles.css 冷色变量为侘寂风 */
+            --bg-primary: #F5F1EB !important;
+            --bg-secondary: #FDFCFA !important;
+            --bg-tertiary: #EDE9E1 !important;
+            --bg-card: rgba(61, 58, 53, 0.03) !important;
+            --bg-card-hover: rgba(61, 58, 53, 0.06) !important;
+            --border-color: #E0DBD0 !important;
+            --border-hover: #D4CFC6 !important;
+            --text-primary: #3D3A35 !important;
+            --text-secondary: #6B665C !important;
+            --text-tertiary: #A09A90 !important;
+            --accent-blue: #A09080 !important;
+            --accent-purple: #8B7D6B !important;
+            --accent-gradient: linear-gradient(135deg, #A09080, #8B7D6B) !important;
+            --accent-glow: rgba(160, 144, 128, 0.12) !important;
+            --glass-bg: rgba(245, 241, 235, 0.85) !important;
+            --glass-border: #E0DBD0 !important;
+            --grid-color: transparent !important;
+        }
+        [data-theme="dark"] {
+            --g-bg: #1C1A17;
+            --g-text: #E8E0D4;
+            --g-text-sub: #A09A8A;
+            --g-text-hint: #7A7468;
+            --g-text-muted: #6B665C;
+            --g-text-faint: #504B42;
+            --g-border: rgba(232, 224, 212, 0.12);
+            --g-border-light: rgba(232, 224, 212, 0.08);
+            --g-surface: rgba(245, 241, 235, 0.06);
+            --g-surface-hover: rgba(245, 241, 235, 0.1);
+            --g-btn-bg: #A09080;
+            --g-btn-text: #1C1A17;
+
+            /* 覆盖全局 styles.css 暗色冷色变量为侘寂风 */
+            --bg-primary: #1C1A17 !important;
+            --bg-secondary: #252220 !important;
+            --bg-tertiary: #2E2B28 !important;
+            --bg-card: rgba(245, 241, 235, 0.03) !important;
+            --bg-card-hover: rgba(245, 241, 235, 0.06) !important;
+            --border-color: rgba(232, 224, 212, 0.12) !important;
+            --border-hover: rgba(232, 224, 212, 0.18) !important;
+            --text-primary: #E8E0D4 !important;
+            --text-secondary: #A09A8A !important;
+            --text-tertiary: #7A7468 !important;
+            --accent-blue: #A09080 !important;
+            --accent-purple: #8B7D6B !important;
+            --accent-gradient: linear-gradient(135deg, #A09080, #8B7D6B) !important;
+            --accent-glow: rgba(160, 144, 128, 0.15) !important;
+            --glass-bg: rgba(28, 26, 23, 0.85) !important;
+            --glass-border: rgba(232, 224, 212, 0.1) !important;
+            --grid-color: transparent !important;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'LXGW WenKai', 'Noto Serif SC', serif;
+            background: var(--g-bg);
+            height: 100vh;
+            height: 100dvh;
+            user-select: none;
+            -webkit-user-select: none;
+            color: var(--g-text);
+        }
+
+        /* 覆盖全局样式 - 保持侘寂风格 */
+        .grid-bg { background-image: none !important; }
+        .radial-glow { display: none !important; }
+        .scroll-progress { display: none !important; }
+        /* 确保弹窗定位不受page-wrapper的will-change影响 */
+        .page-wrapper {
+            will-change: auto !important;
+            min-height: 100vh !important;
+            min-height: 100dvh !important;
+            background: var(--g-bg) !important;
+        }
+        /* 导航栏在侘寂风下的适配 */
+        .top-bar {
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            border-bottom-color: var(--g-border) !important;
+        }
+        html:not([data-theme="dark"]) .top-bar {
+            background: rgba(245, 241, 235, 0.9) !important;
+        }
+        html[data-theme="dark"] .top-bar {
+            background: rgba(28, 26, 23, 0.9) !important;
+        }
+        .top-bar .hamburger-btn {
+            background: transparent !important;
+            border-color: var(--g-border-light) !important;
+        }
+        .top-bar .hamburger-line {
+            background: var(--g-text) !important;
+        }
+        .top-bar .top-bar-logo span {
+            color: var(--g-text) !important;
+        }
+        .top-bar .theme-toggle-btn {
+            background: transparent !important;
+            border-color: var(--g-border-light) !important;
+            color: var(--g-text-sub) !important;
+        }
+        /* 导航面板侘寂风格适配 */
+        .nav-panel-inner {
+            background: var(--g-surface) !important;
+            border-right-color: var(--g-border) !important;
+        }
+        .nav-panel-header {
+            border-bottom-color: var(--g-border) !important;
+        }
+        .nav-panel-close {
+            background: var(--g-surface-hover) !important;
+            border-color: var(--g-border-light) !important;
+            color: var(--g-text-sub) !important;
+        }
+        .nav-panel-link:hover {
+            background: var(--g-surface-hover) !important;
+        }
+        .nav-panel-link.active {
+            background: rgba(160, 144, 128, 0.12) !important;
+        }
+        .nav-panel-link.active .nav-panel-link-icon {
+            background: var(--g-btn-bg) !important;
+            border-color: transparent !important;
+            color: var(--g-btn-text) !important;
+        }
+        .nav-panel-link.active .nav-panel-link-title {
+            color: var(--g-text) !important;
+        }
+        .nav-panel-link-icon {
+            background: var(--g-surface) !important;
+            border-color: var(--g-border-light) !important;
+            color: var(--g-text-hint) !important;
+        }
+        .nav-panel-link:hover .nav-panel-link-icon {
+            background: rgba(160, 144, 128, 0.12) !important;
+            border-color: rgba(160, 144, 128, 0.2) !important;
+            color: var(--g-text) !important;
+        }
+        .nav-panel-link-title {
+            color: var(--g-text) !important;
+        }
+        .nav-panel-link-desc {
+            color: var(--g-text-hint) !important;
+        }
+        .nav-panel-link-arrow {
+            color: var(--g-text-hint) !important;
+        }
+        .nav-panel-footer {
+            border-top-color: var(--g-border) !important;
+        }
+        .nav-panel-theme-btn {
+            background: var(--g-surface) !important;
+            border-color: var(--g-border-light) !important;
+            color: var(--g-text-sub) !important;
+        }
+        .nav-panel-theme-btn:hover {
+            background: var(--g-surface-hover) !important;
+            border-color: var(--g-border) !important;
+            color: var(--g-text) !important;
+        }
+        /* 覆盖全局 radial-glow、scroll-progress、grid-bg 等装饰 */
+        .radial-glow, .scroll-progress, .cursor-glow { display: none !important; }
+        .grid-bg { background-image: none !important; }
+        /* 覆盖全局 page-transition-bar 的紫色渐变 */
+        .page-transition-bar {
+            background: linear-gradient(135deg, #A09080, #8B7D6B) !important;
+            box-shadow: 0 0 12px rgba(160, 144, 128, 0.4) !important;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 64px);
+            height: calc(100dvh - 64px);
+            padding-top: 64px;
+        }
+
+        /* 顶部 */
+        .header {
+            padding: 8px 20px 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: 6px;
+            color: var(--g-text);
+        }
+
+        .header-sub {
+            font-size: 10px;
+            letter-spacing: 4px;
+            color: var(--g-text-hint);
+            margin-top: 2px;
+            text-align: center;
+        }
+
+        /* 分隔线 */
+        .divider {
+            height: 1px;
+            margin: 0 24px;
+            background: linear-gradient(to right, transparent, var(--g-border-light), transparent);
+            flex-shrink: 0;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: var(--g-text-sub);
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        .status-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .status-dot.black { background: var(--g-text); box-shadow: 0 0 0 2px var(--g-bg), 0 0 0 3px var(--g-text-faint); }
+        .status-dot.white { background: var(--g-surface); box-shadow: 0 0 0 2px var(--g-bg), 0 0 0 3px var(--g-text-faint); }
+
+        /* 棋盘区域 */
+        .board-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 12px;
+            min-height: 0;
+        }
+
+        .board-wrapper {
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(61, 58, 53, 0.08);
+            touch-action: none;
+        }
+
+        .board-wrapper canvas {
+            display: block;
+        }
+
+        .board-wrapper canvas:not(:first-child) {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* 底部控制区 */
+        .controls {
+            padding: 10px 24px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            flex-shrink: 0;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 13px 0;
+            border: 1px solid var(--g-border-light);
+            border-radius: 8px;
+            background: transparent;
+            font-family: 'LXGW WenKai', 'Noto Serif SC', serif;
+            font-size: 14px;
+            color: var(--g-text-sub);
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .action-btn:active {
+            background: var(--g-surface-hover);
+            transform: scale(0.97);
+        }
+
+        .btn-undo:disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .btn-restart {
+            background: var(--g-btn-bg);
+            border-color: var(--g-btn-bg);
+            color: var(--g-btn-text);
+        }
+
+        .btn-restart:active {
+            filter: brightness(1.1);
+        }
+
+        /* 胜利弹窗 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(245, 241, 235, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        html[data-theme="dark"] .modal-overlay {
+            background: rgba(28, 26, 23, 0.85);
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-overlay.hidden { display: none; }
+
+        .modal-box {
+            background: var(--g-surface);
+            border: 1px solid var(--g-border);
+            border-radius: 16px;
+            padding: 36px 28px 28px;
+            width: calc(100% - 56px);
+            max-width: 300px;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.show .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-emoji { font-size: 40px; margin-bottom: 12px; }
+
+        .modal-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--g-text);
+            letter-spacing: 3px;
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: var(--g-text-hint);
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+
+        .modal-info {
+            border-top: 1px solid var(--g-border);
+            border-bottom: 1px solid var(--g-border);
+            padding: 14px 0;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .modal-info-label { font-size: 10px; color: var(--g-text-faint); letter-spacing: 1px; margin-bottom: 4px; }
+        .modal-info-value { font-family: 'Noto Serif SC', serif; font-size: 18px; font-weight: 500; color: var(--g-text); }
+
+        .modal-actions { display: flex; gap: 10px; }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--g-border-light);
+            border-radius: 8px;
+            font-family: 'LXGW WenKai', 'Noto Serif SC', serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--g-text-sub);
+            letter-spacing: 1px;
+        }
+
+        .modal-btn-primary {
+            background: var(--g-btn-bg);
+            border-color: var(--g-btn-bg);
+            color: var(--g-btn-text);
+        }
+
+        .modal-btn:active { transform: scale(0.97); }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+    <!-- 顶部 -->
+    <div class="header">
+        <div>
+            <h1>五子棋</h1>
+            <div class="header-sub">人 机 对 弈</div>
+        </div>
+    </div>
+    <div class="divider"></div>
+
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="status-dot black" id="status-dot"></div>
+        <span id="status-text">轮到你落子</span>
+    </div>
+
+    <!-- 棋盘 -->
+    <div class="board-area">
+        <div class="board-wrapper" id="board-wrapper">
+            <canvas id="board-canvas"></canvas>
+            <canvas id="piece-canvas"></canvas>
+            <canvas id="hover-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- 底部控制 -->
+    <div class="controls">
+        <div class="action-row">
+            <button class="action-btn btn-undo" id="btn-undo" disabled>悔棋</button>
+            <button class="action-btn btn-restart" id="btn-restart">重来</button>
+        </div>
+    </div>
+
+    <!-- 胜利弹窗 -->
+    <div class="modal-overlay hidden" id="modal-win">
+        <div class="modal-box">
+            <div class="modal-emoji" id="win-emoji">🎉</div>
+            <div class="modal-title" id="win-title">你赢了</div>
+            <div class="modal-subtitle" id="win-subtitle">精彩的对局</div>
+            <div class="modal-info">
+                <div>
+                    <div class="modal-info-label">总步数</div>
+                    <div class="modal-info-value" id="win-moves">0</div>
+                </div>
+                <div>
+                    <div class="modal-info-label">难度</div>
+                    <div class="modal-info-value" id="win-level">困难</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-primary" id="btn-play-again">再来一局</button>
+                <button class="modal-btn" id="btn-close-modal">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    </div> <!-- /game-container -->
+
+    <script type="module">
+        import { createNav } from './components/nav.js';
+        import { Game } from './games/gomoku/game.js';
+        import { AI } from './games/gomoku/ai.js';
+
+        // === 创建全局导航 ===
+        createNav('games');
+
+        // === 自适应棋盘尺寸 ===
+        const BOARD_SIZE = 15;
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+
+        // 全局导航(~64) + 顶部(~36) + 分隔线(1) + 状态栏(~38) + 底部控制(~60 + safe area) + padding(8)
+        const availH = screenH - 64 - 36 - 1 - 38 - 68 - 8;
+        const availW = screenW - 24;
+        const boardPixel = Math.min(availW, availH);
+
+        const PADDING = Math.max(10, Math.round(boardPixel * 0.035));
+        const CELL_SIZE = Math.floor((boardPixel - PADDING * 2) / (BOARD_SIZE - 1));
+        const canvasSize = CELL_SIZE * (BOARD_SIZE - 1) + PADDING * 2;
+        const PIECE_RADIUS = Math.floor(CELL_SIZE * 0.42);
+
+        const CONFIG = { boardSize: BOARD_SIZE, cellSize: CELL_SIZE, padding: PADDING, pieceRadius: PIECE_RADIUS };
+
+        // === 初始化 Canvas ===
+        const boardCanvas = document.getElementById('board-canvas');
+        const pieceCanvas = document.getElementById('piece-canvas');
+        const hoverCanvas = document.getElementById('hover-canvas');
+
+        [boardCanvas, pieceCanvas, hoverCanvas].forEach(c => {
+            const dpr = window.devicePixelRatio || 1;
+            c.width = canvasSize * dpr;
+            c.height = canvasSize * dpr;
+            c.style.width = canvasSize + 'px';
+            c.style.height = canvasSize + 'px';
+            c.getContext('2d').scale(dpr, dpr);
+        });
+
+        // === 侘寂风格渲染器 ===
+        class WabiSabiRenderer {
+            constructor() {
+                this.boardCtx = boardCanvas.getContext('2d');
+                this.pieceCtx = pieceCanvas.getContext('2d');
+                this.hoverCtx = hoverCanvas.getContext('2d');
+            }
+
+            drawBoard() {
+                const ctx = this.boardCtx;
+                const size = canvasSize;
+
+                // 素雅木色背景
+                ctx.fillStyle = '#E8DFD0';
+                ctx.fillRect(0, 0, size, size);
+
+                // 极淡纹理
+                ctx.save();
+                ctx.globalAlpha = 0.04;
+                for (let i = 0; i < size; i += 4) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i + Math.sin(i * 0.015) * 3);
+                    ctx.lineTo(size, i + Math.sin(i * 0.015 + 1.5) * 3);
+                    ctx.strokeStyle = '#8B7D6B';
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+                ctx.restore();
+
+                // 网格线
+                ctx.strokeStyle = 'rgba(100, 90, 75, 0.35)';
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i < BOARD_SIZE; i++) {
+                    const pos = PADDING + i * CELL_SIZE;
+                    ctx.beginPath(); ctx.moveTo(PADDING, pos); ctx.lineTo(PADDING + (BOARD_SIZE - 1) * CELL_SIZE, pos); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(pos, PADDING); ctx.lineTo(pos, PADDING + (BOARD_SIZE - 1) * CELL_SIZE); ctx.stroke();
+                }
+
+                // 外框
+                ctx.strokeStyle = 'rgba(100, 90, 75, 0.25)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(PADDING - 0.5, PADDING - 0.5, (BOARD_SIZE - 1) * CELL_SIZE + 1, (BOARD_SIZE - 1) * CELL_SIZE + 1);
+
+                // 星位
+                const starPoints = [[3,3],[3,11],[11,3],[11,11],[7,7],[3,7],[7,3],[7,11],[11,7]];
+                ctx.fillStyle = 'rgba(100, 90, 75, 0.5)';
+                const dotR = Math.max(1.5, Math.round(CELL_SIZE * 0.07));
+                for (const [r, c] of starPoints) {
+                    ctx.beginPath();
+                    ctx.arc(PADDING + c * CELL_SIZE, PADDING + r * CELL_SIZE, dotR, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            drawPiece(row, col, player, isLast = false) {
+                const ctx = this.pieceCtx;
+                const x = PADDING + col * CELL_SIZE;
+                const y = PADDING + row * CELL_SIZE;
+
+                ctx.save();
+
+                if (player === 1) {
+                    ctx.shadowColor = 'rgba(0,0,0,0.15)';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetX = 1;
+                    ctx.shadowOffsetY = 1;
+                    const grad = ctx.createRadialGradient(x - 1, y - 1, 1, x, y, PIECE_RADIUS);
+                    grad.addColorStop(0, '#4A4540');
+                    grad.addColorStop(0.6, '#36322E');
+                    grad.addColorStop(1, '#2A2623');
+                    ctx.fillStyle = grad;
+                } else {
+                    ctx.shadowColor = 'rgba(0,0,0,0.1)';
+                    ctx.shadowBlur = 3;
+                    ctx.shadowOffsetX = 0.5;
+                    ctx.shadowOffsetY = 1;
+                    const grad = ctx.createRadialGradient(x - 1, y - 1, 1, x, y, PIECE_RADIUS);
+                    grad.addColorStop(0, '#FDFCFA');
+                    grad.addColorStop(0.5, '#F5F0E8');
+                    grad.addColorStop(1, '#E8E0D4');
+                    ctx.fillStyle = grad;
+                }
+
+                ctx.beginPath();
+                ctx.arc(x, y, PIECE_RADIUS, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowColor = 'transparent';
+
+                // 边缘
+                ctx.strokeStyle = player === 1 ? 'rgba(0,0,0,0.15)' : 'rgba(150,140,125,0.3)';
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+
+                // 高光
+                const hlGrad = ctx.createRadialGradient(x - 2, y - 2, 0, x - 1, y - 1, PIECE_RADIUS * 0.4);
+                hlGrad.addColorStop(0, player === 1 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.5)');
+                hlGrad.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = hlGrad;
+                ctx.beginPath();
+                ctx.arc(x - 1, y - 1, PIECE_RADIUS * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 最后落子标记
+                if (isLast) {
+                    ctx.beginPath();
+                    const markR = Math.max(1.5, Math.round(PIECE_RADIUS * 0.2));
+                    ctx.arc(x, y, markR, 0, Math.PI * 2);
+                    ctx.fillStyle = '#C4745A';
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            clearPieces() {
+                const dpr = window.devicePixelRatio || 1;
+                this.pieceCtx.clearRect(0, 0, canvasSize * dpr, canvasSize * dpr);
+            }
+
+            redrawAllPieces(board, moveHistory) {
+                this.clearPieces();
+                for (let r = 0; r < BOARD_SIZE; r++) {
+                    for (let c = 0; c < BOARD_SIZE; c++) {
+                        if (board[r][c] !== 0) {
+                            const isLast = moveHistory.length > 0 &&
+                                moveHistory[moveHistory.length - 1].row === r &&
+                                moveHistory[moveHistory.length - 1].col === c;
+                            this.drawPiece(r, c, board[r][c], isLast);
+                        }
+                    }
+                }
+            }
+
+            drawWinLine(winLine) {
+                if (!winLine || winLine.length < 5) return;
+                const ctx = this.pieceCtx;
+                winLine.sort((a, b) => a.row === b.row ? a.col - b.col : a.row - b.row);
+                const sx = PADDING + winLine[0].col * CELL_SIZE;
+                const sy = PADDING + winLine[0].row * CELL_SIZE;
+                const ex = PADDING + winLine[winLine.length - 1].col * CELL_SIZE;
+                const ey = PADDING + winLine[winLine.length - 1].row * CELL_SIZE;
+
+                ctx.save();
+                ctx.strokeStyle = '#C4745A';
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.globalAlpha = 0.6;
+                ctx.beginPath();
+                ctx.moveTo(sx, sy);
+                ctx.lineTo(ex, ey);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        // === 游戏状态（默认困难、自动开始）===
+        const game = new Game(BOARD_SIZE);
+        const ai = new AI(BOARD_SIZE);
+        const renderer = new WabiSabiRenderer();
+
+        let state = {
+            started: true,
+            aiLevel: 'hard',
+            aiThinking: false,
+        };
+
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const btnUndo = document.getElementById('btn-undo');
+        const btnRestart = document.getElementById('btn-restart');
+
+        renderer.drawBoard();
+
+        // === 状态更新 ===
+        function updateStatus() {
+            if (game.isGameOver) return;
+            if (game.currentPlayer === 1) {
+                statusDot.className = 'status-dot black';
+                statusText.textContent = '轮到你落子';
+            } else {
+                statusDot.className = 'status-dot white';
+                statusText.textContent = 'AI 思考中…';
+            }
+        }
+
+        // === 坐标转换 ===
+        function getTouchPos(touch) {
+            const rect = hoverCanvas.getBoundingClientRect();
+            const scaleX = canvasSize / rect.width;
+            const scaleY = canvasSize / rect.height;
+            const x = (touch.clientX - rect.left) * scaleX;
+            const y = (touch.clientY - rect.top) * scaleY;
+            const col = Math.round((x - PADDING) / CELL_SIZE);
+            const row = Math.round((y - PADDING) / CELL_SIZE);
+            if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) return { row, col };
+            return null;
+        }
+
+        // === 落子逻辑 ===
+        function handleMove(row, col) {
+            if (!state.started || game.isGameOver || state.aiThinking) return;
+            if (game.currentPlayer === 2) return;
+
+            const result = game.makeMove(row, col);
+            if (!result) return;
+
+            renderer.drawPiece(row, col, result.player, true);
+            if (game.moveHistory.length > 1) {
+                const prev = game.moveHistory[game.moveHistory.length - 2];
+                renderer.drawPiece(prev.row, prev.col, prev.player, false);
+            }
+            btnUndo.disabled = false;
+
+            if (result.winner !== null) {
+                handleGameEnd(result.winner, result.winLine);
+                return;
+            }
+
+            updateStatus();
+
+            if (game.currentPlayer === 2 && !game.isGameOver) {
+                state.aiThinking = true;
+                updateStatus();
+                setTimeout(() => {
+                    const aiMove = ai.getMove(game.board, state.aiLevel);
+                    if (aiMove) {
+                        const aiResult = game.makeMove(aiMove.row, aiMove.col);
+                        if (aiResult) {
+                            renderer.drawPiece(aiMove.row, aiMove.col, aiResult.player, true);
+                            const prev = game.moveHistory[game.moveHistory.length - 2];
+                            renderer.drawPiece(prev.row, prev.col, prev.player, false);
+                            if (aiResult.winner !== null) {
+                                handleGameEnd(aiResult.winner, aiResult.winLine);
+                            }
+                        }
+                    }
+                    state.aiThinking = false;
+                    updateStatus();
+                }, 200 + Math.random() * 300);
+            }
+        }
+
+        function handleGameEnd(winner, winLine) {
+            state.started = false;
+            btnUndo.disabled = true;
+
+            if (winner === 1) {
+                statusText.textContent = '🎉 你赢了！';
+            } else if (winner === 2) {
+                statusText.textContent = '😏 菜就多练';
+            } else {
+                statusText.textContent = '☯ 平局';
+            }
+
+            if (winLine) renderer.drawWinLine(winLine);
+            setTimeout(() => showWinModal(winner), 600);
+        }
+
+        function showWinModal(winner) {
+            const modal = document.getElementById('modal-win');
+
+            if (winner === 0) {
+                document.getElementById('win-emoji').textContent = '☯';
+                document.getElementById('win-title').textContent = '平局';
+                document.getElementById('win-subtitle').textContent = '棋逢对手';
+            } else if (winner === 1) {
+                document.getElementById('win-emoji').textContent = '◉';
+                document.getElementById('win-title').textContent = '你赢了';
+                document.getElementById('win-subtitle').textContent = '精彩的对局';
+            } else {
+                document.getElementById('win-emoji').textContent = '😏';
+                document.getElementById('win-title').textContent = '菜就多练';
+                document.getElementById('win-subtitle').textContent = '不服再来';
+            }
+
+            document.getElementById('win-moves').textContent = game.moveHistory.length;
+            document.getElementById('win-level').textContent = '困难';
+
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => modal.classList.add('show'));
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal-win');
+            modal.classList.remove('show');
+            setTimeout(() => modal.classList.add('hidden'), 400);
+        }
+
+        function resetGame() {
+            game.reset();
+            state.started = true;
+            state.aiThinking = false;
+            renderer.clearPieces();
+            updateStatus();
+            btnUndo.disabled = true;
+        }
+
+        // === 触摸事件 ===
+        hoverCanvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            const pos = getTouchPos(touch);
+            if (pos && game.board[pos.row][pos.col] === 0) {
+                handleMove(pos.row, pos.col);
+            }
+        }, { passive: false });
+
+        // 也支持 click（兼容桌面调试）
+        hoverCanvas.addEventListener('click', (e) => {
+            const rect = hoverCanvas.getBoundingClientRect();
+            const scaleX = canvasSize / rect.width;
+            const scaleY = canvasSize / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            const col = Math.round((x - PADDING) / CELL_SIZE);
+            const row = Math.round((y - PADDING) / CELL_SIZE);
+            if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE && game.board[row][col] === 0) {
+                handleMove(row, col);
+            }
+        });
+
+        // === 按钮事件 ===
+        btnUndo.addEventListener('click', () => {
+            if (!state.started || game.isGameOver || state.aiThinking) return;
+            game.undoMove();
+            game.undoMove();
+            renderer.redrawAllPieces(game.board, game.moveHistory);
+            updateStatus();
+            if (game.moveHistory.length === 0) btnUndo.disabled = true;
+        });
+
+        btnRestart.addEventListener('click', resetGame);
+
+        document.getElementById('btn-play-again').addEventListener('click', () => {
+            closeModal();
+            setTimeout(() => resetGame(), 400);
+        });
+
+        document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+
+        document.getElementById('modal-win').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        updateStatus();
+    </script>
+</body>
+</html>
