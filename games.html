@@ -80,15 +80,13 @@
 
             <!-- 游戏区域（iframe 嵌入，五子棋/2048 共用） -->
             <div id="game-area" style="display: none;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                     <h2 id="game-area-title" style="font-size: 20px; font-weight: 600; color: var(--text-primary);"><i class="ri-goblet-line" style="color: var(--accent-blue);"></i> 五子棋</h2>
                     <button id="close-game" class="btn-ghost" style="font-size: 13px; padding: 6px 16px;">
                         <i class="ri-close-line"></i> 关闭游戏
                     </button>
                 </div>
-                <div style="border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; background: #fff;">
-                    <iframe id="game-iframe" src="" style="width: 100%; height: 80vh; max-height: 800px; border: none;" title="游戏"></iframe>
-                </div>
+                <iframe id="game-iframe" src="" style="width: 100%; height: calc(100vh - 200px); border: none; border-radius: 12px;" title="游戏"></iframe>
             </div>
         </section>
     </div>
