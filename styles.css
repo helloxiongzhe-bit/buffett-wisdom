@@ -173,37 +173,32 @@
     background-clip: text;
 }
 
-/* 禅模式 - 卡片悬停（毛玻璃效果） */
+/* 禅模式 - 卡片 hover（与其他主题一致的交互方式，仅换色） */
 [data-theme="zen"] .card:hover {
-    background: rgba(200, 190, 170, 0.04);
-    border-color: rgba(200, 190, 170, 0.10);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06),
-                inset 0 1px 0 rgba(200, 190, 170, 0.06);
-    transform: translateY(-2px);
+    background: var(--bg-card-hover);
+    border-color: rgba(160, 144, 128, 0.18);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 24px rgba(160, 144, 128, 0.05);
 }
 
 [data-theme="zen"] .card:hover::before {
-    background: linear-gradient(135deg, rgba(200, 190, 170, 0.05), transparent 50%, rgba(200, 190, 170, 0.05));
+    background: linear-gradient(135deg, rgba(160, 144, 128, 0.2), rgba(139, 125, 107, 0.08) 50%, rgba(184, 168, 152, 0.2));
+    opacity: 1;
 }
 
-/* 禅模式 - 卡片光晕跟随为暖色 */
+/* 禅模式 - 卡片光晕跟随 */
 [data-theme="zen"] .card .card-shine {
     background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(200, 190, 170, 0.04), transparent 40%);
+        rgba(160, 144, 128, 0.05), transparent 40%);
 }
 
-/* 禅模式 - 发光卡片（毛玻璃） */
+/* 禅模式 - glow-card hover */
 [data-theme="zen"] .glow-card:hover {
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.08),
-                inset 0 1px 0 rgba(200, 190, 170, 0.06);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15), 0 0 32px rgba(160, 144, 128, 0.06);
 }
 
 [data-theme="zen"] .glow-card:hover::after {
-    background: linear-gradient(135deg, rgba(160, 144, 128, 0.5), rgba(139, 125, 107, 0.5));
+    background: linear-gradient(135deg, rgba(160, 144, 128, 0.35), rgba(139, 125, 107, 0.35));
 }
 
 /* 禅模式 - 按钮 */
@@ -242,9 +237,42 @@
     color: #B8A898;
 }
 
+/* 禅模式 - 标签 hover */
+[data-theme="zen"] .tag:hover {
+    background: rgba(160, 144, 128, 0.18);
+    border-color: rgba(160, 144, 128, 0.28);
+    color: #B8A898;
+}
+
+/* 禅模式 - Tab按钮 hover */
+[data-theme="zen"] .tab-btn:hover {
+    background: rgba(160, 144, 128, 0.06);
+}
+
+/* 禅模式 - Tab按钮 active shadow */
+[data-theme="zen"] .tab-btn.active {
+    box-shadow: 0 2px 8px rgba(160, 144, 128, 0.20);
+}
+
+/* 禅模式 - 筛选按钮 active shadow（增强版覆盖） */
+[data-theme="zen"] .filter-btn.active {
+    box-shadow: 0 0 16px rgba(160, 144, 128, 0.12);
+}
+
+/* 禅模式 - 搜索框聚焦增强 shadow */
+[data-theme="zen"] .search-input:focus {
+    box-shadow: 0 0 0 3px rgba(160, 144, 128, 0.10), 0 4px 16px rgba(160, 144, 128, 0.06);
+}
+
+/* 禅模式 - 主按钮 active */
+[data-theme="zen"] .btn-primary:active {
+    box-shadow: 0 2px 8px rgba(160, 144, 128, 0.15);
+}
+
 /* 禅模式 - 进度条和过渡 */
 [data-theme="zen"] .scroll-progress {
     background: linear-gradient(135deg, #A09080, #8B7D6B);
+    box-shadow: 0 0 8px rgba(160, 144, 128, 0.35);
 }
 
 [data-theme="zen"] .page-transition-bar {
