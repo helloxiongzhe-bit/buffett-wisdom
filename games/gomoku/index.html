@@ -41,6 +41,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" rel="stylesheet">
+    <!-- 全局样式 & 导航栏依赖 -->
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -58,6 +61,25 @@
             --g-surface-hover: #EDE9E1;
             --g-btn-bg: #3D3A35;
             --g-btn-text: #F5F1EB;
+
+            /* 覆盖全局 styles.css 冷色变量为侘寂风 */
+            --bg-primary: #F5F1EB !important;
+            --bg-secondary: #FDFCFA !important;
+            --bg-tertiary: #EDE9E1 !important;
+            --bg-card: rgba(61, 58, 53, 0.03) !important;
+            --bg-card-hover: rgba(61, 58, 53, 0.06) !important;
+            --border-color: #E0DBD0 !important;
+            --border-hover: #D4CFC6 !important;
+            --text-primary: #3D3A35 !important;
+            --text-secondary: #6B665C !important;
+            --text-tertiary: #A09A90 !important;
+            --accent-blue: #A09080 !important;
+            --accent-purple: #8B7D6B !important;
+            --accent-gradient: linear-gradient(135deg, #A09080, #8B7D6B) !important;
+            --accent-glow: rgba(160, 144, 128, 0.12) !important;
+            --glass-bg: rgba(245, 241, 235, 0.85) !important;
+            --glass-border: #E0DBD0 !important;
+            --grid-color: transparent !important;
         }
         [data-theme="dark"] {
             --g-bg: #1C1A17;
@@ -72,6 +94,25 @@
             --g-surface-hover: rgba(245, 241, 235, 0.1);
             --g-btn-bg: #A09080;
             --g-btn-text: #1C1A17;
+
+            /* 覆盖全局 styles.css 暗色冷色变量为侘寂风 */
+            --bg-primary: #1C1A17 !important;
+            --bg-secondary: #252220 !important;
+            --bg-tertiary: #2E2B28 !important;
+            --bg-card: rgba(245, 241, 235, 0.03) !important;
+            --bg-card-hover: rgba(245, 241, 235, 0.06) !important;
+            --border-color: rgba(232, 224, 212, 0.12) !important;
+            --border-hover: rgba(232, 224, 212, 0.18) !important;
+            --text-primary: #E8E0D4 !important;
+            --text-secondary: #A09A8A !important;
+            --text-tertiary: #7A7468 !important;
+            --accent-blue: #A09080 !important;
+            --accent-purple: #8B7D6B !important;
+            --accent-gradient: linear-gradient(135deg, #A09080, #8B7D6B) !important;
+            --accent-glow: rgba(160, 144, 128, 0.15) !important;
+            --glass-bg: rgba(28, 26, 23, 0.85) !important;
+            --glass-border: rgba(232, 224, 212, 0.1) !important;
+            --grid-color: transparent !important;
         }
 
         html, body {
@@ -86,10 +127,19 @@
             user-select: none;
         }
 
+        /* 覆盖全局装饰元素 - 保持侘寂风格纯净 */
+        .grid-bg { background-image: none !important; }
+        .radial-glow, .scroll-progress, .cursor-glow { display: none !important; }
+        .page-wrapper {
+            will-change: auto !important;
+            min-height: auto !important;
+            background: var(--g-bg) !important;
+        }
+
         .game-container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            height: calc(100vh - 56px);
         }
 
         /* === 游戏顶部栏 === */
@@ -603,45 +653,9 @@
         }
 
         .close-btn:hover { background: var(--g-border); }
-
-        /* === 返回按钮 === */
-        .back-btn {
-            position: fixed;
-            top: 10px;
-            left: 12px;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 5px 12px;
-            border: 1px solid var(--g-border);
-            border-radius: 18px;
-            background: var(--g-surface);
-            color: var(--g-text-sub);
-            font-size: 13px;
-            font-family: 'LXGW WenKai', 'Noto Serif SC', serif;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            text-decoration: none;
-        }
-        .back-btn:hover {
-            background: var(--g-surface-hover);
-            border-color: var(--g-text-faint);
-            color: var(--g-text);
-        }
-        .back-btn svg {
-            width: 15px;
-            height: 15px;
-            flex-shrink: 0;
-        }
     </style>
 </head>
 <body>
-    <!-- 返回 Play 页面 -->
-    <a href="games.html" class="back-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        Play
-    </a>
     <div class="game-container">
     <!-- 游戏顶部栏 -->
     <div class="game-top-bar">
@@ -826,12 +840,13 @@
 
         // === 自适应棋盘尺寸（适配一屏）===
         const BOARD_SIZE = 15;
-        const topBarH = 52;
+        const navBarH = 56;  // 全局 Buffett 导航栏高度
+        const topBarH = 52;  // 游戏内部顶部栏高度
         const mainPad = 12;
         const sidePanelW = 200;
         const gapW = 24;
 
-        const availH = window.innerHeight - topBarH - mainPad * 2;
+        const availH = window.innerHeight - navBarH - topBarH - mainPad * 2;
         const availW = window.innerWidth - sidePanelW * 2 - gapW * 2 - mainPad * 2;
         const boardPixel = Math.min(availH, availW);
 
@@ -1195,6 +1210,11 @@
 
         updateStatus();
         updateStats();
+    </script>
+    <!-- 全局导航栏 -->
+    <script type="module">
+        import { createNav } from './components/nav.js';
+        createNav('games');
     </script>
 </body>
 </html>

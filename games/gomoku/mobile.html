@@ -131,8 +131,8 @@
         .game-container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            height: 100dvh;
+            height: calc(100vh - 56px);
+            height: calc(100dvh - 56px);
         }
 
         /* 顶部 */
@@ -364,44 +364,9 @@
         }
 
         .modal-btn:active { transform: scale(0.97); }
-
-        /* === 返回按钮 === */
-        .back-btn {
-            position: fixed;
-            top: 8px;
-            left: 10px;
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 5px 12px;
-            border: 1px solid var(--g-border);
-            border-radius: 18px;
-            background: var(--g-surface);
-            color: var(--g-text-sub);
-            font-size: 12px;
-            font-family: 'LXGW WenKai', 'Noto Serif SC', serif;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            text-decoration: none;
-        }
-        .back-btn:active {
-            background: var(--g-surface-hover);
-            transform: scale(0.96);
-        }
-        .back-btn svg {
-            width: 14px;
-            height: 14px;
-            flex-shrink: 0;
-        }
     </style>
 </head>
 <body>
-    <!-- 返回 Play 页面 -->
-    <a href="games.html" class="back-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        Play
-    </a>
     <div class="game-container">
     <!-- 顶部 -->
     <div class="header">
@@ -469,8 +434,8 @@
         const screenW = window.innerWidth;
         const screenH = window.innerHeight;
 
-        // 顶部(~36) + 分隔线(1) + 状态栏(~38) + 底部控制(~60 + safe area) + padding(8)
-        const availH = screenH - 36 - 1 - 38 - 68 - 8;
+        // 顶部导航栏(56) + 标题(~36) + 分隔线(1) + 状态栏(~38) + 底部控制(~60 + safe area) + padding(8)
+        const availH = screenH - 56 - 36 - 1 - 38 - 68 - 8;
         const availW = screenW - 24;
         const boardPixel = Math.min(availW, availH);
 
@@ -839,6 +804,12 @@
         });
 
         updateStatus();
+    </script>
+
+    <!-- 全局导航栏 -->
+    <script type="module">
+        import { createNav } from './components/nav.js';
+        createNav('games');
     </script>
 </body>
 </html>
