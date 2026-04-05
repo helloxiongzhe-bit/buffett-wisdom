@@ -460,6 +460,39 @@ body {
     .top-bar-logo span {
         font-size: 14px !important;
     }
+
+    /* 防止内容溢出屏幕 */
+    html, body {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    section {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    .quote-block {
+        padding: 16px 16px 16px 24px;
+    }
+
+    .stat-artistic {
+        font-size: 2rem;
+    }
+
+    .person-card {
+        padding: 24px 16px;
+    }
+
+    .person-card .avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 36px;
+    }
 }
 
 /* ===== 页面过渡 ===== */
